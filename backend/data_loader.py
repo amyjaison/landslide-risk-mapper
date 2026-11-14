@@ -458,9 +458,23 @@ class DataLoaderService:
 
     def search_locations(self, query):
         """
-        Search for locations via Nominatim OpenStreetMap
-        Geocoder, with fuzzy matching across curated
-        demo locations, aliases, and built-in gazetteer.
+        Search for locations worldwide.
+
+        Search order:
+        1. Decimal coordinates
+        2. Built-in known locations
+        3. Fuzzy matching for known locations
+        4. Global OpenStreetMap Nominatim search
+
+        This allows users to enter locations such as:
+        - Wayanad
+        - Bhutan
+        - Canada
+        - Tokyo
+        - London
+        - Paris
+        - Nepal
+        - Any other valid place name worldwide
         """
 
         import difflib
@@ -487,6 +501,7 @@ class DataLoaderService:
                     -90 <= lat <= 90
                     and -180 <= lon <= 180
                 ):
+
                     return [{
                         "display_name": (
                             f"Coordinate Location "
@@ -788,7 +803,7 @@ class DataLoaderService:
         q_lower = query_str.lower()
 
         # ============================================================
-        # EXACT / PARTIAL GAZETTEER MATCH
+        # 3. EXACT / PARTIAL GAZETTEER MATCH
         # ============================================================
 
         for item in gazetteer:
@@ -830,7 +845,7 @@ class DataLoaderService:
                     })
 
         # ============================================================
-        # FUZZY MATCHING
+        # 4. FUZZY MATCHING
         # ============================================================
 
         all_aliases = [
@@ -872,7 +887,7 @@ class DataLoaderService:
                         })
 
         # ============================================================
-        # OPENSTREETMAP NOMINATIM
+        # 5. GLOBAL OPENSTREETMAP NOMINATIM SEARCH
         # ============================================================
 
         try:
@@ -885,54 +900,90 @@ class DataLoaderService:
                 "User-Agent": (
                     "LandslideRiskMapper/1.0 "
                     "(Hackathon Educational GIS Tool)"
-                )
+                ),
+                "Accept": "application/json",
+                "Accept-Language": "en"
             }
 
             params = {
                 "q": query_str,
-                "format": "json",
-                "limit": 4,
-                "addressdetails": 1
+                "format": "jsonv2",
+                "limit": 6,
+                "addressdetails": 1,
+                "dedupe": 1
             }
 
-            resp = requests.get(
+            response = requests.get(
                 url,
                 params=params,
                 headers=headers,
-                timeout=4
+                timeout=10
             )
 
-            if resp.status_code == 200:
+            if response.status_code == 200:
 
-                items = resp.json()
+                items = response.json()
 
                 for item in items:
 
-                    la = float(item.get("lat"))
-                    lo = float(item.get("lon"))
+                    try:
+
+                        la = float(item.get("lat"))
+                        lo = float(item.get("lon"))
+
+                    except (
+                        TypeError,
+                        ValueError
+                    ):
+                        continue
+
+                    if not (
+                        -90 <= la <= 90
+                        and -180 <= lo <= 180
+                    ):
+                        continue
 
                     coord_key = (
                         round(la, 3),
                         round(lo, 3)
                     )
 
-                    if coord_key not in seen_coords:
+                    if coord_key in seen_coords:
+                        continue
 
-                        seen_coords.add(coord_key)
+                    seen_coords.add(coord_key)
 
-                        results.append({
-                            "display_name": item.get(
-                                "display_name"
-                            ),
-                            "lat": la,
-                            "lon": lo,
-                            "type": item.get(
-                                "type",
-                                "location"
+                    results.append({
+                        "display_name": (
+                            item.get(
+                                "display_name",
+                                query_str
                             )
-                        })
+                        ),
+                        "lat": la,
+                        "lon": lo,
+                        "type": item.get(
+                            "type",
+                            "location"
+                        )
+                    })
+
+            else:
+
+                # Do not crash the application if
+                # Nominatim temporarily rejects the request.
+                pass
+
+        except requests.RequestException:
+
+            # Network/geocoder failure should not
+            # break the application.
+            pass
 
         except Exception:
+
+            # Any unexpected geocoding issue should
+            # not break the application.
             pass
 
         return results
