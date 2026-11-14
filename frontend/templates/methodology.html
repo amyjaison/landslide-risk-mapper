@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Methodology — Landslide Risk Mapper</title>
+
+    <link rel="icon"
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏔️%3C/text%3E%3C/svg%3E">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .content-page {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #111111;
+            border-radius: var(--radius-lg);
+            border: 1px solid #3a3a3a;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .content-page h1 {
+            color: #f8fafc;
+            margin-bottom: 0.5rem;
+        }
+
+        .content-page h2 {
+            color: #a7e3c5;
+            margin-top: 1.8rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid #3b4b44;
+            padding-bottom: 0.4rem;
+        }
+
+        .content-page h3 {
+            color: #a7e3c5;
+            margin-top: 1.2rem;
+        }
+
+        .content-page p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+            color: #d7e2dd;
+        }
+
+        .content-page li {
+            color: #d7e2dd;
+            line-height: 1.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .intro {
+            font-size: 1rem;
+        }
+
+        .formula-card {
+            background: #1b1d1e;
+            border-left: 4px solid #5a8f74;
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin: 1.25rem 0;
+            font-family: monospace;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #e2e8e5;
+            overflow-x: auto;
+        }
+
+        .ml-card {
+            background: #14231c;
+            border: 1px solid #3d7058;
+            border-left: 4px solid #22c55e;
+            padding: 1.25rem;
+            border-radius: 9px;
+            margin: 1.25rem 0;
+        }
+
+        .ml-card h3 {
+            margin-top: 0;
+            color: #86efac;
+        }
+
+        .ml-feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .ml-feature {
+            background: #101713;
+            border: 1px solid #304338;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .ml-feature strong {
+            display: block;
+            color: #86efac;
+            margin-bottom: 0.35rem;
+        }
+
+        .ml-feature span {
+            color: #cbd5d1;
+            font-size: 0.9rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.65rem;
+            margin-top: 1rem;
+        }
+
+        .metric {
+            background: #101713;
+            border: 1px solid #304338;
+            border-radius: 7px;
+            padding: 0.8rem 0.4rem;
+            text-align: center;
+        }
+
+        .metric-label {
+            display: block;
+            color: #94a3a0;
+            font-size: 0.7rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .metric-value {
+            display: block;
+            color: #86efac;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .table-spec {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .table-spec th,
+        .table-spec td {
+            border: 1px solid #414446;
+            padding: 0.65rem 0.9rem;
+            font-size: 0.88rem;
+            text-align: left;
+            color: #d7e2dd;
+        }
+
+        .table-spec th {
+            background: #202324;
+            color: #f8fafc;
+            font-weight: 700;
+        }
+
+        .table-spec tr:nth-child(even) {
+            background: #171919;
+        }
+
+        .dataset-note {
+            background: #1b1d1e;
+            border: 1px solid #3b4140;
+            border-radius: 8px;
+            padding: 1rem 1.15rem;
+            margin-top: 1rem;
+        }
+
+        .dataset-note strong {
+            color: #a7e3c5;
+        }
+
+        .warning-box {
+            background: #211f14;
+            border: 1px solid #665d2b;
+            border-left: 4px solid #eab308;
+            border-radius: 8px;
+            padding: 1rem 1.15rem;
+            margin-top: 1rem;
+        }
+
+        .warning-box strong {
+            color: #facc15;
+        }
+
+        @media (max-width: 800px) {
+            .content-page {
+                margin: 1rem;
+                padding: 1.25rem;
+            }
+
+            .ml-feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .table-spec {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <a href="/" class="brand-wrapper">
+            <div class="brand-icon">🏔️</div>
+
+            <div>
+                <span class="brand-title">
+                    Landslide Risk Mapper
+                </span>
+
+                <span class="brand-subtitle">
+                    AI & GIS Multi-Criteria Vulnerability Assessment
+                </span>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="/" class="nav-link">
+                    Map Dashboard
+                </a>
+            </li>
+
+            <li>
+                <a href="/methodology" class="nav-link active">
+                    Methodology
+                </a>
+            </li>
+
+            <li>
+                <a href="/data-sources" class="nav-link">
+                    Data Sources
+                </a>
+            </li>
+
+            <li>
+                <a href="/about" class="nav-link">
+                    About
+                </a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+
+    <main class="content-page">
+
+        <h1>Machine Learning & GIS Methodology</h1>
+
+        <p class="intro">
+            The <strong>Landslide Risk Mapper</strong> combines
+            geospatial environmental analysis with a
+            <strong>Random Forest machine-learning model</strong>
+            to provide a screening-level assessment of landslide
+            susceptibility.
+        </p>
+
+
+        <!-- 1 -->
+        <h2>1. Overall System Workflow</h2>
+
+        <p>
+            The system follows a multi-stage workflow that transforms
+            geographic coordinates into environmental indicators and
+            finally into a machine-learning-based susceptibility score.
+        </p>
+
+        <div class="formula-card">
+            Location Input
+            → GIS Data Retrieval
+            → Terrain & Environmental Analysis
+            → Feature Preparation
+            → Random Forest Prediction
+            → Risk Score
+            → GIS Visualization
+        </div>
+
+        <p>
+            The platform also displays rainfall, terrain,
+            elevation, historical landslide information and other
+            environmental indicators as supporting context.
+        </p>
+
+
+        <!-- 2 -->
+        <h2>2. Geospatial Data Processing</h2>
+
+        <p>
+            When a user selects a geographic location, the backend
+            retrieves environmental information associated with that
+            location. The system uses elevation and terrain information
+            to calculate local slope characteristics.
+        </p>
+
+        <ul>
+            <li>
+                <strong>Latitude and Longitude:</strong>
+                Define the target geographic location.
+            </li>
+
+            <li>
+                <strong>Elevation:</strong>
+                Represents the terrain height above sea level.
+            </li>
+
+            <li>
+                <strong>Slope:</strong>
+                Represents the steepness of the terrain.
+            </li>
+
+            <li>
+                <strong>Rainfall:</strong>
+                Provides recent precipitation information for
+                environmental context.
+            </li>
+
+            <li>
+                <strong>Historical Landslides:</strong>
+                Provide regional evidence of previously recorded
+                landslide events.
+            </li>
+        </ul>
+
+
+        <!-- 3 -->
+        <h2>3. Slope Analysis</h2>
+
+        <p>
+            Slope is one of the primary physical indicators associated
+            with landslide susceptibility. Steeper terrain generally
+            experiences greater gravitational stress and can therefore
+            have increased susceptibility to slope failure.
+        </p>
+
+        <p>
+            The GIS engine derives terrain gradients from elevation
+            information using spatial differences between neighboring
+            elevation cells.
+        </p>
+
+        <div class="formula-card">
+            dz/dx = [Z(x+1,y) - Z(x-1,y)] / (2 × Δx)
+
+            dz/dy = [Z(x,y+1) - Z(x,y-1)] / (2 × Δy)
+
+            Slope = arctan(√((dz/dx)² + (dz/dy)²))
+        </div>
+
+        <table class="table-spec">
+
+            <thead>
+                <tr>
+                    <th>Slope Angle</th>
+                    <th>Classification</th>
+                    <th>Interpretation</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>0° – 15°</td>
+                    <td>
+                        <span style="color:#22c55e;font-weight:700;">
+                            Low
+                        </span>
+                    </td>
+                    <td>
+                        Relatively gentle terrain.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>15° – 30°</td>
+                    <td>
+                        <span style="color:#eab308;font-weight:700;">
+                            Moderate
+                        </span>
+                    </td>
+                    <td>
+                        Increased susceptibility under adverse
+                        environmental conditions.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>30° – 45°</td>
+                    <td>
+                        <span style="color:#f97316;font-weight:700;">
+                            High
+                        </span>
+                    </td>
+                    <td>
+                        Steep terrain with increased gravitational
+                        loading.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>&gt; 45°</td>
+                    <td>
+                        <span style="color:#ef4444;font-weight:700;">
+                            Very High
+                        </span>
+                    </td>
+                    <td>
+                        Very steep terrain requiring increased
+                        monitoring.
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+
+        <!-- 4 -->
+        <h2>4. Rainfall & Environmental Analysis</h2>
+
+        <p>
+            Rainfall is an important supporting environmental indicator
+            because prolonged or intense precipitation can increase
+            soil moisture and pore-water pressure.
+        </p>
+
+        <ul>
+            <li>
+                <strong>72-hour antecedent rainfall:</strong>
+                Represents recent accumulated precipitation.
+            </li>
+
+            <li>
+                <strong>24-hour rainfall:</strong>
+                Represents short-term rainfall loading.
+            </li>
+
+            <li>
+                <strong>7-day precipitation:</strong>
+                Provides a visual representation of recent rainfall
+                trends through the dashboard hyetograph.
+            </li>
+        </ul>
+
+        <p>
+            These rainfall indicators are displayed alongside the
+            machine-learning prediction to provide environmental
+            context.
+        </p>
+
+
+        <!-- 5 -->
+        <h2>5. Random Forest Machine Learning Model</h2>
+
+        <div class="ml-card">
+
+            <h3>🌲 Random Forest Landslide Susceptibility Assessment</h3>
+
+            <p>
+                The primary machine-learning component of the current
+                system is a <strong>Random Forest classifier</strong>.
+                The model was trained using a public
+                geo-environmental landslide dataset.
+            </p>
+
+            <p>
+                The trained model predicts the probability that a
+                location belongs to the landslide-susceptible class.
+                This probability is converted into a score from
+                <strong>0 to 100</strong>.
+            </p>
+
+            <div class="ml-feature-grid">
+
+                <div class="ml-feature">
+                    <strong>Feature 1 — Slope</strong>
+                    <span>
+                        Local slope angle in degrees.
+                    </span>
+                </div>
+
+                <div class="ml-feature">
+                    <strong>Feature 2 — Elevation</strong>
+                    <span>
+                        Local terrain elevation in metres.
+                    </span>
+                </div>
+
+                <div class="ml-feature">
+                    <strong>Target Variable</strong>
+                    <span>
+                        Binary landslide susceptibility class.
+                    </span>
+                </div>
+
+                <div class="ml-feature">
+                    <strong>Algorithm</strong>
+                    <span>
+                        Random Forest Classifier.
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- 6 -->
+        <h2>6. Training Dataset</h2>
+
+        <p>
+            The model was trained using the
+            <strong>
+                A Geo-Environmental Feature Dataset for Landslide
+                Susceptibility Modelling in Himachal Pradesh, India
+            </strong>
+            from Mendeley Data.
+        </p>
+
+        <div class="dataset-note">
+
+            <p style="margin:0;">
+                <strong>Dataset:</strong>
+                Landslide Modelling Dataset
+            </p>
+
+            <p style="margin:0.6rem 0 0;">
+                <strong>Total samples:</strong>
+                12,409
+            </p>
+
+            <p style="margin:0.6rem 0 0;">
+                <strong>Training samples:</strong>
+                9,927
+            </p>
+
+            <p style="margin:0.6rem 0 0;">
+                <strong>Testing samples:</strong>
+                2,482
+            </p>
+
+            <p style="margin:0.6rem 0 0;">
+                <strong>Predictive features:</strong>
+                slope_deg, elevation_m
+            </p>
+
+            <p style="margin:0.6rem 0 0;">
+                <strong>Target:</strong>
+                class
+            </p>
+
+        </div>
+
+
+        <!-- 7 -->
+        <h2>7. Model Training Process</h2>
+
+        <p>
+            The dataset was divided into training and testing subsets
+            using an 80/20 stratified split. A preprocessing pipeline
+            was then applied before training the Random Forest model.
+        </p>
+
+        <div class="formula-card">
+            Dataset
+            → Train/Test Split
+            → Missing Value Imputation
+            → Feature Scaling
+            → Random Forest Training
+            → Testing
+            → Performance Evaluation
+        </div>
+
+        <p>
+            The Random Forest configuration uses multiple decision
+            trees and class balancing to improve classification
+            performance across the two target classes.
+        </p>
+
+
+        <!-- 8 -->
+        <h2>8. Model Performance</h2>
+
+        <p>
+            The trained model was evaluated using standard
+            classification metrics on the held-out testing dataset.
+        </p>
+
+        <div class="metrics-grid">
+
+            <div class="metric">
+                <span class="metric-label">
+                    Accuracy
+                </span>
+                <span class="metric-value">
+                    75.99%
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    Precision
+                </span>
+                <span class="metric-value">
+                    74.25%
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    Recall
+                </span>
+                <span class="metric-value">
+                    83.23%
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    F1 Score
+                </span>
+                <span class="metric-value">
+                    78.48%
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    ROC-AUC
+                </span>
+                <span class="metric-value">
+                    83.05%
+                </span>
+            </div>
+
+        </div>
+
+
+        <!-- 9 -->
+        <h2>9. ML Risk Score Calculation</h2>
+
+        <p>
+            The Random Forest produces a probability for the
+            landslide-susceptible class. The dashboard converts this
+            probability into a percentage-style risk score.
+        </p>
+
+        <div class="formula-card">
+            ML Probability = P(Landslide Susceptible | Slope, Elevation)
+
+            ML Risk Score = ML Probability × 100
+        </div>
+
+        <p>
+            The resulting score is classified into four dashboard
+            categories.
+        </p>
+
+        <table class="table-spec">
+
+            <thead>
+                <tr>
+                    <th>Score</th>
+                    <th>Risk Level</th>
+                    <th>Indicator</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>0 – 25</td>
+                    <td>Low Risk</td>
+                    <td>
+                        <span style="background:#22c55e;color:white;padding:3px 8px;border-radius:4px;">
+                            Green
+                        </span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>26 – 50</td>
+                    <td>Moderate Risk</td>
+                    <td>
+                        <span style="background:#eab308;color:white;padding:3px 8px;border-radius:4px;">
+                            Yellow
+                        </span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>51 – 75</td>
+                    <td>High Risk</td>
+                    <td>
+                        <span style="background:#f97316;color:white;padding:3px 8px;border-radius:4px;">
+                            Orange
+                        </span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>76 – 100</td>
+                    <td>Very High Risk</td>
+                    <td>
+                        <span style="background:#ef4444;color:white;padding:3px 8px;border-radius:4px;">
+                            Red
+                        </span>
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+
+        <!-- 10 -->
+        <h2>10. GIS Visualization</h2>
+
+        <p>
+            The predicted susceptibility is presented through an
+            interactive Leaflet map. The dashboard allows users to
+            inspect the selected location together with environmental
+            layers.
+        </p>
+
+        <ul>
+            <li>Topographic basemap</li>
+            <li>Satellite imagery</li>
+            <li>OpenStreetMap basemap</li>
+            <li>Slope analysis layer</li>
+            <li>Rainfall information layer</li>
+            <li>Terrain and elevation layer</li>
+            <li>Historical landslide layer</li>
+            <li>Combined vulnerability visualization</li>
+        </ul>
+
+
+        <!-- 11 -->
+        <h2>11. Supporting Historical Evidence</h2>
+
+        <p>
+            Historical landslide records from the NASA Global
+            Landslide Catalog are used as supporting regional
+            evidence. These records help users understand whether
+            landslide events have previously been documented around
+            an area.
+        </p>
+
+        <p>
+            Historical observations are presented separately from
+            the Random Forest prediction and should not be interpreted
+            as direct ML input unless explicitly included in the
+            trained model.
+        </p>
+
+
+        <!-- 12 -->
+        <h2>12. Limitations & Responsible Use</h2>
+
+        <div class="warning-box">
+
+            <p style="margin:0;">
+                <strong>Important:</strong>
+                The Landslide Risk Mapper provides a
+                <strong>screening-level susceptibility assessment</strong>.
+                It is not a precise prediction of the exact location,
+                timing, magnitude, or occurrence of a future landslide.
+            </p>
+
+            <p style="margin:0.7rem 0 0;">
+                The system does not replace detailed geotechnical
+                investigations, field surveys, sensor networks,
+                engineering assessments, or official warnings from
+                relevant authorities.
+            </p>
+
+        </div>
+
+    </main>
+
+</body>
+</html>
