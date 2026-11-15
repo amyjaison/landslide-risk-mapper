@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Landslide Risk Mapper — Geospatial Vulnerability Intelligence</title>
+
+  <link rel="icon"
+        href="data:image/svg+xml,*<*&#x73;vg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22>*<*&#x74;ext y=%22.9em%22 font-size=%2290%22>🏔️*<*/text>*<*/svg>">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}">
+
+  <style>
+    /* =========================================================
+       ML MODEL CARD
+       ========================================================= */
+
+    .ml-model-card {
+      border: 1px solid #d1fae5;
+      background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    }
+
+    .ml-model-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 12px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+    }
+
+    .ml-score-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .ml-score-value {
+      font-size: 2.2rem;
+      line-height: 1.1;
+      font-weight: 800;
+      color: #166534;
+      margin-top: 0.2rem;
+    }
+
+    .ml-risk-badge {
+      padding: 0.45rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .ml-feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+    }
+
+    .ml-feature-box {
+      padding: 0.75rem;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+
+    .ml-feature-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: 0.3rem;
+    }
+
+    .ml-feature-box strong {
+      display: block;
+      font-size: 0.9rem;
+      color: #1e293b;
+    }
+
+    .ml-feature-box span {
+      display: block;
+      font-size: 0.7rem;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .ml-performance {
+      padding: 0.85rem;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 1rem;
+    }
+
+    .ml-performance-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #334155;
+      margin-bottom: 0.65rem;
+    }
+
+    .ml-performance-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.45rem;
+    }
+
+    .ml-performance-grid > div {
+      text-align: center;
+      padding: 0.45rem 0.2rem;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .ml-performance-grid span {
+      display: block;
+      font-size: 0.62rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .ml-performance-grid strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 0.78rem;
+      color: #166534;
+    }
+
+    .ml-source-note {
+      font-size: 0.68rem;
+      color: #64748b;
+      margin-top: 0.65rem;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 700px) {
+      .ml-performance-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================================================
+       TOP NAVIGATION
+       ========================================================= -->
+
+  <nav class="navbar">
+
+    <a href="/" class="brand-wrapper">
+
+      <div class="brand-icon">🏔️</div>
+
+      <div>
+        <span class="brand-title">Landslide Risk Mapper</span>
+        <span class="brand-subtitle">
+          AI & GIS Multi-Criteria Vulnerability Assessment
+        </span>
+      </div>
+
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 1rem;">
+
+      <select id="demo-scenario-select"
+              class="demo-selector"
+              title="Select a curated demonstration scenario">
+
+        <option value="" disabled selected>
+          ⚡ Quick Demo Scenarios
+        </option>
+
+        {% for demo in demo_locations %}
+
+        <option value="{{ demo.lat }}|{{ demo.lon }}|{{ demo.name }}">
+          {{ demo.name }} ({{ demo.expected_risk }})
+        </option>
+
+        {% endfor %}
+
+      </select>
+
+      <ul class="nav-links">
+
+        <li>
+          <a href="/" class="nav-link active">
+            Map Dashboard
+          </a>
+        </li>
+
+        <li>
+          <a href="/methodology" class="nav-link">
+            Methodology
+          </a>
+        </li>
+
+        <li>
+          <a href="/data-sources" class="nav-link">
+            Data Sources
+          </a>
+        </li>
+
+        <li>
+          <a href="/about" class="nav-link">
+            About
+          </a>
+        </li>
+
+      </ul>
+
+    </div>
+
+  </nav>
+
+
+  <!-- =========================================================
+       SCREENING DISCLAIMER
+       ========================================================= -->
+
+  <div class="screening-banner">
+
+    <div>
+
+      <strong>⚠️ Screening-Level Hazard Assessment:</strong>
+
+      This application provides a machine-learning-assisted
+      landslide susceptibility assessment using environmental
+      and geospatial information. It is designed for regional
+      risk screening and does NOT predict the exact timing or
+      occurrence of landslides.
+
+    </div>
+
+    <span style="font-size: 0.75rem; opacity: 0.85;">
+      For Decision Support & Hackathon Demonstration
+    </span>
+
+  </div>
+
+
+  <!-- =========================================================
+       MAIN APPLICATION
+       ========================================================= -->
+
+  <main class="app-container">
+
+
+    <!-- =======================================================
+         LEFT / CENTER MAP
+         ======================================================= -->
+
+    <section class="map-card">
+
+      <div class="map-toolbar">
+
+        <div class="search-container">
+
+          <span class="search-icon">🔍</span>
+
+          <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="Search city, district, village, mountain or coordinates (e.g. 11.53, 76.13)..."
+            autocomplete="off"
+          />
+
+          <div id="search-suggestions"
+               class="search-suggestions">
+          </div>
+
+        </div>
+
+
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+
+          <div style="
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+          ">
+
+            <label
+              for="weather-mode-select"
+              style="
+                font-size: 0.78rem;
+                font-weight: 700;
+                color: #334155;
+              "
+            >
+              Rainfall Input:
+            </label>
+
+            <select
+              id="weather-mode-select"
+              style="
+                font-size: 0.78rem;
+                border: none;
+                background: transparent;
+                font-weight: 600;
+                outline: none;
+                cursor: pointer;
+                color: #1e293b;
+              "
+            >
+
+              <option value="monsoon_event" selected>
+                🔴 Disaster Peak / Monsoon Event
+              </option>
+
+              <option value="auto">
+                🟢 Live Satellite Observations (Current)
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="map-status-pill">
+
+            <span style="
+              display: inline-block;
+              width: 8px;
+              height: 8px;
+              border-radius: 50%;
+              background: #10b981;
+            "></span>
+
+            <span>GIS Engine Active</span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Data-quality notice (shown only when estimated data is used) -->
+      <div id="data-notice" role="status" style="
+        display: none;
+        margin: 0 1rem 0.5rem;
+        padding: 0.6rem 0.9rem;
+        border-radius: 8px;
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        color: #78350f;
+        font-size: 0.85rem;
+        line-height: 1.4;
+      "></div>
+
+      <!-- Leaflet Map -->
+
+      <div style="
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      ">
+
+        <div id="map-view"></div>
+
+
+        <!-- =====================================================
+             FLOATING MAP LEGEND
+             ===================================================== -->
+
+        <div
+          class="map-floating-legend"
+          id="interactive-legend"
+        >
+
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+          ">
+
+            <span
+              class="legend-title"
+              id="legend-active-title"
+              style="margin: 0;"
+            >
+              Map Layer Legend
+            </span>
+
+            <div class="legend-tab-bar">
+
+              <button
+                type="button"
+                class="legend-tab-btn active"
+                data-legend="risk"
+                title="Risk Score Legend"
+              >
+                Risk
+              </button>
+
+              <button
+                type="button"
+                class="legend-tab-btn"
+                data-legend="slope"
+                title="Slope Legend"
+              >
+                Slope
+              </button>
+
+              <button
+                type="button"
+                class="legend-tab-btn"
+                data-legend="rain"
+                title="Rainfall Legend"
+              >
+                Rain
+              </button>
+
+              <button
+                type="button"
+                class="legend-tab-btn"
+                data-legend="terrain"
+                title="Terrain & Elevation Legend"
+              >
+                Elev
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- Risk -->
+
+          <div
+            id="legend-panel-risk"
+            class="legend-panel active"
+          >
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #22c55e;">
+              </span>
+              <span>Low Risk (0–25)</span>
+            </div>
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #eab308;">
+              </span>
+              <span>Moderate Risk (26–50)</span>
+            </div>
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #f97316;">
+              </span>
+              <span>High Risk (51–75)</span>
+            </div>
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #ef4444;">
+              </span>
+              <span>Very High Risk (76–100)</span>
+            </div>
+
+          </div>
+
+
+          <!-- Slope -->
+
+          <div
+            id="legend-panel-slope"
+            class="legend-panel"
+          >
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #22c55e;">
+              </span>
+              <span>Gentle (0–15°)</span>
+            </div>
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #eab308;">
+              </span>
+              <span>Moderate (15–30°)</span>
+            </div>
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #ea580c;">
+              </span>
+              <span>High / Critical (30–45°)</span>
+            </div>
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #7f1d1d;">
+              </span>
+              <span>Precipitous (>45°)</span>
+            </div>
+
+          </div>
+
+
+          <!-- Rain -->
+
+          <div
+            id="legend-panel-rain"
+            class="legend-panel"
+          >
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #bae6fd;">
+              </span>
+              <span>Light (&lt;25 mm)*</span>
+            </div>
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #38bdf8;">
+              </span>
+              <span>Moderate (25–75 mm)</span>
+            </div>
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #0284c7;">
+              </span>
+              <span>Heavy (75–150 mm)</span>
+            </div>
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #1e3a8a;">
+              </span>
+              <span>Torrential / Extreme (&gt;150 mm)</span>
+            </div>
+
+          </div>
+
+
+          <!-- Terrain -->
+
+          <div
+            id="legend-panel-terrain"
+            class="legend-panel"
+          >
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #84cc16;">
+              </span>
+              <span>Plain / Valley (&lt;200 m)*</span>
+            </div>
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #d97706;">
+              </span>
+              <span>Uplands / Hills (200–1000 m)</span>
+            </div>
+
+            <div class="legend-row">
+              <span class="legend-color"
+                    style="background: #b45309;">
+              </span>
+              <span>Escarpment / Mountain (1000–2500 m)</span>
+            </div>
+
+            <div class="legend-row">
+              <span
+                class="legend-color"
+                style="
+                  background: #f8fafc;
+                  border: 1px solid #cbd5e1;
+                "
+              ></span>
+
+              <span>High Alpine (&gt;2500 m)</span>
+            </div>
+
+          </div>
+
+
+          <div style="
+            font-size: 0.72rem;
+            color: #64748b;
+            margin-top: 6px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 4px;
+            display: flex;
+            justify-content: space-between;
+          ">
+
+            <span>⚠️ Red marker: NASA GLC Event</span>
+
+            <span>💡 Click map to probe</span>
+
+          </div>
+
+        </div>
+
+
+        <!-- Loading -->
+
+        <div
+          id="loading-overlay"
+          class="loading-overlay"
+        >
+
+          <div class="spinner"></div>
+
+          <span>
+            Processing Elevation, Rainfall & ML Risk Assessment...
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =======================================================
+         RIGHT SIDEBAR
+         ======================================================= -->
+
+    <aside class="sidebar-dashboard">
+
+
+      <!-- =====================================================
+           LOCATION
+           ===================================================== -->
+
+      <div class="card">
+
+        <div class="card-title">
+
+          <span>Target Location</span>
+
+          <span style="
+            font-size: 0.75rem;
+            color: #16a34a;
+            font-weight: 600;
+          ">
+            Active Target
+          </span>
+
+        </div>
+
+        <div
+          id="dash-location-name"
+          class="location-name"
+        >
+          Wayanad (Chooralmala), Kerala
+        </div>
+
+        <div
+          id="dash-location-coords"
+          class="location-coords"
+        >
+          Lat: 11.5273° N, Lon: 76.1264° E
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           MAIN SCORE
+           ===================================================== -->
+
+      <div class="card score-card">
+
+        <div style="
+          font-size: 0.8rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          color: #475569;
+          letter-spacing: 0.05em;
+        ">
+          ML Landslide Risk Score
+        </div>
+
+        <div
+          id="dash-risk-score"
+          class="score-number"
+        >
+          --
+        </div>
+
+        <div>
+
+          <span
+            id="dash-risk-badge"
+            class="score-badge"
+          >
+            Loading...
+          </span>
+
+        </div>
+
+
+        <!-- Meter -->
+
+        <div class="score-meter-bar">
+
+          <div
+            id="dash-meter-fill"
+            class="score-meter-fill"
+            style="
+              width: 0%;
+              background-color: #22c55e;
+            "
+          ></div>
+
+        </div>
+
+        <div style="
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.72rem;
+          color: #94a3b8;
+        ">
+
+          <span>0 (Low)</span>
+          <span>50</span>
+          <span>100 (Critical)</span>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           ENVIRONMENTAL PARAMETERS
+           ===================================================== -->
+
+      <div class="card">
+
+        <div class="card-title">
+          Terrain & Climate Parameters
+        </div>
+
+        <div class="param-grid">
+
+
+          <!-- Elevation -->
+
+          <div class="param-box">
+
+            <div class="param-label">
+              Elevation
+            </div>
+
+            <div
+              id="dash-elev"
+              class="param-value"
+            >
+              -- m
+            </div>
+
+            <div
+              id="dash-relief"
+              class="param-sub"
+            >
+              Relief: --
+            </div>
+
+          </div>
+
+
+          <!-- Slope -->
+
+          <div class="param-box">
+
+            <div class="param-label">
+              Slope Angle
+            </div>
+
+            <div
+              id="dash-slope"
+              class="param-value"
+            >
+              --°
+            </div>
+
+            <div
+              id="dash-slope-cat"
+              class="param-sub"
+            >
+              Loading...
+            </div>
+
+          </div>
+
+
+          <!-- Rainfall -->
+
+          <div class="param-box">
+
+            <div class="param-label">
+              72h Antecedent Rain
+            </div>
+
+            <div
+              id="dash-rain-72h"
+              class="param-value"
+            >
+              -- mm
+            </div>
+
+            <div
+              id="dash-rain-intensity"
+              class="param-sub"
+            >
+              Loading...
+            </div>
+
+          </div>
+
+
+          <!-- Terrain -->
+
+          <div class="param-box">
+
+            <div class="param-label">
+              Geomorphology
+            </div>
+
+            <div
+              id="dash-terrain-type"
+              class="param-value"
+              style="font-size: 0.95rem;"
+            >
+              Loading...
+            </div>
+
+            <div
+              id="dash-tri"
+              class="param-sub"
+            >
+              TRI: --
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           MACHINE LEARNING MODEL ASSESSMENT
+           ===================================================== -->
+
+      <div class="card ml-model-card">
+
+        <div class="card-title">
+
+          <span>
+            Machine Learning Assessment
+          </span>
+
+          <span style="
+            font-size: 0.75rem;
+            color: #15803d;
+            font-weight: 700;
+          ">
+            Random Forest
+          </span>
+
+        </div>
+
+
+        <!-- ML Score -->
+
+        <div class="ml-model-header">
+
+          <div>
+
+            <div class="ml-score-label">
+              Model Risk Probability
+            </div>
+
+            <div
+              id="ml-risk-score"
+              class="ml-score-value"
+            >
+              --
+            </div>
+
+          </div>
+
+          <div
+            id="ml-risk-badge"
+            class="ml-risk-badge"
+          >
+            Loading...
+          </div>
+
+        </div>
+
+
+        <!-- Features -->
+
+        <div class="ml-feature-grid">
+
+          <div class="ml-feature-box">
+
+            <div class="ml-feature-title">
+              Slope
+            </div>
+
+            <strong id="ml-slope-value">
+              --
+            </strong>
+
+            <span>
+              degrees
+            </span>
+
+          </div>
+
+
+          <div class="ml-feature-box">
+
+            <div class="ml-feature-title">
+              Elevation
+            </div>
+
+            <strong id="ml-elevation-value">
+              --
+            </strong>
+
+            <span>
+              meters
+            </span>
+
+          </div>
+
+
+          <div class="ml-feature-box">
+
+            <div class="ml-feature-title">
+              Model
+            </div>
+
+            <strong>
+              Random Forest
+            </strong>
+
+            <span>
+              Binary Classification
+            </span>
+
+          </div>
+
+
+          <div class="ml-feature-box">
+
+            <div class="ml-feature-title">
+              Dataset
+            </div>
+
+            <strong>
+              Mendeley
+            </strong>
+
+            <span>
+              12,409 samples
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- Model Performance -->
+
+        <div class="ml-performance">
+
+          <div class="ml-performance-title">
+            Model Performance
+          </div>
+
+          <div class="ml-performance-grid">
+
+            <div>
+              <span>Accuracy</span>
+              <strong>75.99%</strong>
+            </div>
+
+            <div>
+              <span>Precision</span>
+              <strong>74.25%</strong>
+            </div>
+
+            <div>
+              <span>Recall</span>
+              <strong>83.23%</strong>
+            </div>
+
+            <div>
+              <span>F1 Score</span>
+              <strong>78.48%</strong>
+            </div>
+
+            <div>
+              <span>ROC-AUC</span>
+              <strong>83.05%</strong>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Explanation -->
+
+        <div
+          id="dash-explanation-box"
+          class="explanation-box"
+        >
+
+          <strong>
+            ML-Based Assessment:
+          </strong>
+
+          <p
+            id="dash-explanation-text"
+            style="margin-top: 4px;"
+          >
+            Loading machine-learning assessment...
+          </p>
+
+        </div>
+
+
+        <div class="ml-source-note">
+
+          Model trained using the Mendeley
+          <i>Geo-Environmental Feature Dataset for
+          Landslide Susceptibility Modelling in Himachal Pradesh</i>.
+          The current Random Forest model uses slope and elevation
+          as predictive features.
+
+        </div>
+
+      </div>
+
+    </aside>
+
+  </main>
+
+
+  <!-- =========================================================
+       ANALYTICS
+       ========================================================= -->
+
+  <section class="analytics-section">
+
+    <div
+      class="analytics-grid"
+      style="
+        grid-template-columns:
+        repeat(auto-fit, minmax(320px, 1fr));
+      "
+    >
+
+
+      <!-- Factor Chart -->
+
+      <div class="chart-card">
+
+        <div class="card-title">
+          Environmental Factor Distribution
+        </div>
+
+        <div class="chart-container">
+
+          <canvas id="factor-chart"></canvas>
+
+        </div>
+
+      </div>
+
+
+      <!-- Rainfall Chart -->
+
+      <div class="chart-card">
+
+        <div class="card-title">
+          Recent 7-Day Precipitation Hyetograph
+        </div>
+
+        <div class="chart-container">
+
+          <canvas id="rainfall-chart"></canvas>
+
+        </div>
+
+      </div>
+
+
+      <!-- Risk Distribution -->
+
+      <div class="chart-card">
+
+        <div class="card-title">
+          Regional Risk Distribution
+        </div>
+
+        <div class="chart-container">
+
+          <canvas id="risk-distribution-chart"></canvas>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         HISTORICAL EVENTS
+         ======================================================= -->
+
+    <div
+      class="chart-card"
+      style="margin-top: 1.25rem;"
+    >
+
+      <div class="card-title">
+
+        <span>
+          Historical Landslide Events
+          (NASA Global Landslide Catalog)
+        </span>
+
+        <span
+          id="historical-count-badge"
+          class="map-status-pill"
+        >
+          Loading catalog...
+        </span>
+
+      </div>
+
+
+      <div class="table-responsive">
+
+        <table class="historical-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Event / Location
+              </th>
+
+              <th>
+                Date
+              </th>
+
+              <th>
+                Hazard Classification
+              </th>
+
+              <th>
+                Documented Trigger
+              </th>
+
+              <th>
+                Fatalities
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="historical-records-tbody">
+
+            <tr>
+
+              <td
+                colspan="5"
+                style="
+                  text-align: center;
+                  color: #94a3b8;
+                  padding: 1rem;
+                "
+              >
+                Searching NASA GLC records...
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div style="
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      ">
+
+        <div>
+
+          <b>Data Source Tags:</b>
+
+          DEM:
+          <span id="source-dem-badge">
+            SRTM 30m
+          </span>
+
+          |
+
+          Rainfall:
+          <span id="source-rain-badge">
+            Open-Meteo / CHIRPS
+          </span>
+
+        </div>
+
+        <div>
+
+          <i>
+            Historical records are independent observations
+            used to ground-truth regional vulnerability.
+          </i>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================================================
+       FOOTER
+       ========================================================= -->
+
+  <footer class="footer">
+
+    <p>
+
+      <b>Landslide Risk Mapper</b>
+      &mdash;
+      Built for Hackathon Demonstration.
+
+    </p>
+
+    <p style="
+      margin-top: 4px;
+      font-size: 0.75rem;
+      color: #64748b;
+    ">
+
+      Powered by Python, Flask, Rasterio, GeoPandas,
+      NumPy, Leaflet.js, Random Forest ML,
+      and Open Geospatial Data.
+
+    </p>
+
+  </footer>
+
+
+  <!-- =========================================================
+       SCRIPTS
+       ========================================================= -->
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+  ></script>
+
+  <script
+    src="{{ url_for('static', filename='js/map.js') }}"
+  ></script>
+
+  <script
+    src="{{ url_for('static', filename='js/charts.js') }}"
+  ></script>
+
+  <script
+    src="{{ url_for('static', filename='js/dashboard.js') }}"
+  ></script>
+<!-- =========================================================
+     ISOLATED LANDSLIDE ASSISTANT
+     ========================================================= -->
+
+<style>
+    #landslide-assistant-frame {
+        position: fixed;
+        right: 24px;
+        bottom: 94px;
+
+        width: 370px;
+        height: 520px;
+
+        border: none;
+        border-radius: 18px;
+
+        background: white;
+
+        box-shadow:
+            0 15px 45px rgba(0, 0, 0, 0.25);
+
+        z-index: 9999;
+
+        display: none;
+    }
+
+    #landslide-assistant-frame.assistant-frame-visible {
+        display: block;
+    }
+
+    #landslide-assistant-button {
+        position: fixed;
+
+        right: 24px;
+        bottom: 24px;
+
+        width: 58px;
+        height: 58px;
+
+        border: none;
+        border-radius: 50%;
+
+        background: #14532d;
+        color: white;
+
+        font-size: 24px;
+
+        cursor: pointer;
+
+        box-shadow:
+            0 6px 20px rgba(0, 0, 0, 0.25);
+
+        z-index: 10000;
+
+        transition: transform 0.2s ease,
+                    background 0.2s ease;
+    }
+
+    #landslide-assistant-button:hover {
+        background: #166534;
+        transform: scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+
+        #landslide-assistant-frame {
+            right: 12px;
+            bottom: 82px;
+
+            width: calc(100vw - 24px);
+            height: 480px;
+        }
+
+        #landslide-assistant-button {
+            right: 16px;
+            bottom: 16px;
+        }
+    }
+</style>
+
+
+<iframe
+    id="landslide-assistant-frame"
+    src="{{ url_for('web.assistant') }}"
+    title="Landslide Assistant"
+></iframe>
+
+
+<button
+    id="landslide-assistant-button"
+    type="button"
+    aria-label="Open Landslide Assistant"
+    title="Open Landslide Assistant"
+>
+    💬
+</button>
+
+
+<script>
+(function () {
+
+    const button =
+        document.getElementById(
+            "landslide-assistant-button"
+        );
+
+    const frame =
+        document.getElementById(
+            "landslide-assistant-frame"
+        );
+
+    if (!button || !frame) {
+        return;
+    }
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            frame.classList.toggle(
+                "assistant-frame-visible"
+            );
+
+        }
+    );
+
+})();
+</script>
+</body>
+
+</html>
