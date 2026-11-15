@@ -242,17 +242,26 @@ def historical():
 def home():
     return render_template('index.html', demo_locations=Config.DEMO_LOCATIONS)
 
+
+@web_bp.route('/assistant')
+def assistant():
+    return render_template('assistant.html')
+
+
 @web_bp.route('/favicon.ico')
 def favicon():
     return ('', 204)
+
 
 @web_bp.route('/about')
 def about():
     return render_template('about.html')
 
+
 @web_bp.route('/methodology')
 def methodology():
     return render_template('methodology.html')
+
 
 @web_bp.route('/data-sources')
 def data_sources():

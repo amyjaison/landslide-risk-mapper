@@ -1320,7 +1320,134 @@
   <script
     src="{{ url_for('static', filename='js/dashboard.js') }}"
   ></script>
+<!-- =========================================================
+     ISOLATED LANDSLIDE ASSISTANT
+     ========================================================= -->
 
+<style>
+    #landslide-assistant-frame {
+        position: fixed;
+        right: 24px;
+        bottom: 94px;
+
+        width: 370px;
+        height: 520px;
+
+        border: none;
+        border-radius: 18px;
+
+        background: white;
+
+        box-shadow:
+            0 15px 45px rgba(0, 0, 0, 0.25);
+
+        z-index: 9999;
+
+        display: none;
+    }
+
+    #landslide-assistant-frame.assistant-frame-visible {
+        display: block;
+    }
+
+    #landslide-assistant-button {
+        position: fixed;
+
+        right: 24px;
+        bottom: 24px;
+
+        width: 58px;
+        height: 58px;
+
+        border: none;
+        border-radius: 50%;
+
+        background: #14532d;
+        color: white;
+
+        font-size: 24px;
+
+        cursor: pointer;
+
+        box-shadow:
+            0 6px 20px rgba(0, 0, 0, 0.25);
+
+        z-index: 10000;
+
+        transition: transform 0.2s ease,
+                    background 0.2s ease;
+    }
+
+    #landslide-assistant-button:hover {
+        background: #166534;
+        transform: scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+
+        #landslide-assistant-frame {
+            right: 12px;
+            bottom: 82px;
+
+            width: calc(100vw - 24px);
+            height: 480px;
+        }
+
+        #landslide-assistant-button {
+            right: 16px;
+            bottom: 16px;
+        }
+    }
+</style>
+
+
+<iframe
+    id="landslide-assistant-frame"
+    src="{{ url_for('web.assistant') }}"
+    title="Landslide Assistant"
+></iframe>
+
+
+<button
+    id="landslide-assistant-button"
+    type="button"
+    aria-label="Open Landslide Assistant"
+    title="Open Landslide Assistant"
+>
+    💬
+</button>
+
+
+<script>
+(function () {
+
+    const button =
+        document.getElementById(
+            "landslide-assistant-button"
+        );
+
+    const frame =
+        document.getElementById(
+            "landslide-assistant-frame"
+        );
+
+    if (!button || !frame) {
+        return;
+    }
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            frame.classList.toggle(
+                "assistant-frame-visible"
+            );
+
+        }
+    );
+
+})();
+</script>
 </body>
 
 </html>

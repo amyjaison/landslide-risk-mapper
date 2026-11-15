@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Landslide Assistant</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background: white;
+        }
+
+        .assistant-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .assistant-header {
+            height: 64px;
+            flex-shrink: 0;
+            background: #0f3d2e;
+            color: white;
+
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            padding: 10px 16px;
+        }
+
+        .assistant-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #dcfce7;
+            color: #14532d;
+
+            font-size: 20px;
+        }
+
+        .assistant-title {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .assistant-subtitle {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .assistant-messages {
+            flex: 1;
+            min-height: 0;
+
+            padding: 14px;
+
+            overflow-y: auto;
+
+            background: #f8fafc;
+
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 88%;
+            padding: 10px 12px;
+
+            border-radius: 12px;
+
+            font-size: 13px;
+            line-height: 1.45;
+
+            word-wrap: break-word;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+
+            background: white;
+            color: #1e293b;
+
+            border: 1px solid #e2e8f0;
+        }
+
+        .user-message {
+            align-self: flex-end;
+
+            background: #166534;
+            color: white;
+        }
+
+        .quick-questions {
+            flex-shrink: 0;
+
+            display: flex;
+            gap: 6px;
+
+            padding: 8px 10px;
+
+            overflow-x: auto;
+
+            background: white;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .quick-question {
+            flex-shrink: 0;
+
+            border: 1px solid #bbf7d0;
+            background: #f0fdf4;
+            color: #166534;
+
+            border-radius: 20px;
+
+            padding: 6px 10px;
+
+            font-size: 11px;
+
+            cursor: pointer;
+        }
+
+        .quick-question:hover {
+            background: #dcfce7;
+        }
+
+        .input-area {
+            flex-shrink: 0;
+
+            display: flex;
+            gap: 8px;
+
+            padding: 10px;
+
+            background: white;
+
+            border-top: 1px solid #e2e8f0;
+        }
+
+        #assistant-input {
+            flex: 1;
+            min-width: 0;
+
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+
+            padding: 10px 12px;
+
+            font-size: 13px;
+
+            outline: none;
+        }
+
+        #assistant-input:focus {
+            border-color: #16a34a;
+        }
+
+        #assistant-send {
+            width: 42px;
+            flex-shrink: 0;
+
+            border: none;
+            border-radius: 10px;
+
+            background: #166534;
+            color: white;
+
+            font-size: 17px;
+
+            cursor: pointer;
+        }
+
+        #assistant-send:hover {
+            background: #14532d;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="assistant-wrapper">
+
+    <div class="assistant-header">
+
+        <div class="assistant-icon">
+            🌋
+        </div>
+
+        <div>
+            <div class="assistant-title">
+                Landslide Assistant
+            </div>
+
+            <div class="assistant-subtitle">
+                Landslide Risk Mapper
+            </div>
+        </div>
+
+    </div>
+
+
+    <div
+        id="assistant-messages"
+        class="assistant-messages"
+    ></div>
+
+
+    <div class="quick-questions">
+
+        <button
+            class="quick-question"
+            data-question="What is the current risk?"
+        >
+            Current Risk
+        </button>
+
+        <button
+            class="quick-question"
+            data-question="What is the slope?"
+        >
+            Slope
+        </button>
+
+        <button
+            class="quick-question"
+            data-question="What is the elevation?"
+        >
+            Elevation
+        </button>
+
+        <button
+            class="quick-question"
+            data-question="What model is used?"
+        >
+            Model
+        </button>
+
+        <button
+            class="quick-question"
+            data-question="How accurate is the model?"
+        >
+            Accuracy
+        </button>
+
+        <button
+            class="quick-question"
+            data-question="How does this work?"
+        >
+            How it works
+        </button>
+
+    </div>
+
+
+    <div class="input-area">
+
+        <input
+            id="assistant-input"
+            type="text"
+            placeholder="Ask about landslide risk..."
+            autocomplete="off"
+        >
+
+        <button
+            id="assistant-send"
+            type="button"
+        >
+            ➤
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+(function () {
+
+    const messages =
+        document.getElementById("assistant-messages");
+
+    const input =
+        document.getElementById("assistant-input");
+
+    const sendButton =
+        document.getElementById("assistant-send");
+
+
+    function addMessage(text, sender) {
+
+        const message =
+            document.createElement("div");
+
+        message.className =
+            "message " +
+            (sender === "user"
+                ? "user-message"
+                : "bot-message");
+
+        message.textContent = text;
+
+        messages.appendChild(message);
+
+        messages.scrollTop =
+            messages.scrollHeight;
+    }
+
+
+    function getResponse(question) {
+
+        const q =
+            question.toLowerCase().trim();
+
+
+        if (
+            q.includes("current risk") ||
+            q.includes("risk level") ||
+            q === "risk" ||
+            q.includes("risk now")
+        ) {
+
+            return "The current landslide risk is shown on the Landslide Risk Mapper dashboard. Select a location on the map to view its latest risk assessment.";
+
+        }
+
+
+        if (
+            q.includes("slope") ||
+            q.includes("steep")
+        ) {
+
+            return "Slope describes how steep the terrain is. Steeper slopes generally have higher landslide susceptibility.";
+
+        }
+
+
+        if (
+            q.includes("elevation") ||
+            q.includes("height")
+        ) {
+
+            return "Elevation represents the height of the selected location above sea level. It is one of the terrain variables used by the system.";
+
+        }
+
+
+        if (
+            q.includes("rain") ||
+            q.includes("rainfall") ||
+            q.includes("precipitation")
+        ) {
+
+            return "Rainfall can increase landslide susceptibility, especially when heavy or prolonged rainfall saturates the soil.";
+
+        }
+
+
+        if (
+            q.includes("model") ||
+            q.includes("random forest") ||
+            q.includes("machine learning")
+        ) {
+
+            return "The Landslide Risk Mapper uses a Random Forest machine-learning model trained on the Mendeley landslide susceptibility dataset containing 12,409 samples.";
+
+        }
+
+
+        if (
+            q.includes("dataset") ||
+            q.includes("training data") ||
+            q.includes("data used")
+        ) {
+
+            return "The model was trained using the Mendeley landslide susceptibility dataset containing 12,409 samples.";
+
+        }
+
+
+        if (
+            q.includes("accuracy") ||
+            q.includes("performance") ||
+            q.includes("how accurate")
+        ) {
+
+            return "The Random Forest model achieved 75.99% accuracy, 74.25% precision, 83.23% recall, 78.48% F1-score and 83.05% ROC-AUC on the held-out test set.";
+
+        }
+
+
+        if (
+            q.includes("how does this work") ||
+            q.includes("how does it work") ||
+            q.includes("how it works")
+        ) {
+
+            return "You select a location, the system retrieves terrain and environmental information, calculates the relevant parameters, and the Random Forest model estimates landslide susceptibility. The result is displayed on the map and dashboard.";
+
+        }
+
+
+        if (
+            q.includes("factor") ||
+            q.includes("what affects") ||
+            q.includes("parameter")
+        ) {
+
+            return "The system works with terrain and environmental information such as slope, elevation, rainfall and historical landslide information. The current Random Forest model uses slope and elevation as its prediction features.";
+
+        }
+
+
+        if (
+            q.includes("low risk")
+        ) {
+
+            return "Low Risk means the model estimates relatively low landslide susceptibility for the selected location. It is a screening result, not a guarantee that a landslide cannot occur.";
+
+        }
+
+
+        if (
+            q.includes("high risk") ||
+            q.includes("very high risk")
+        ) {
+
+            return "A High or Very High Risk result indicates higher estimated landslide susceptibility. It should be interpreted as decision-support information rather than an exact prediction.";
+
+        }
+
+
+        if (
+            q.includes("safe") ||
+            q.includes("dangerous")
+        ) {
+
+            return "The application is designed for screening and decision support. It does not predict the exact timing of a landslide, so official warnings and local authorities should always be followed.";
+
+        }
+
+
+        if (
+            q === "help" ||
+            q.includes("what can you do")
+        ) {
+
+            return "You can ask me about landslide risk, slope, elevation, rainfall, the Random Forest model, the dataset, model accuracy, or how the Landslide Risk Mapper works.";
+
+        }
+
+
+        return "I can help explain the landslide risk, slope, elevation, rainfall, Random Forest model, dataset, accuracy, and how the Landslide Risk Mapper works.";
+
+    }
+
+
+    function sendMessage() {
+
+        const question =
+            input.value.trim();
+
+        if (!question) {
+            return;
+        }
+
+        addMessage(question, "user");
+
+        input.value = "";
+
+        setTimeout(function () {
+
+            addMessage(
+                getResponse(question),
+                "assistant"
+            );
+
+        }, 200);
+
+    }
+
+
+    sendButton.addEventListener(
+        "click",
+        sendMessage
+    );
+
+
+    input.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                sendMessage();
+
+            }
+
+        }
+    );
+
+
+    document
+        .querySelectorAll(".quick-question")
+        .forEach(function (button) {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    input.value =
+                        button.getAttribute(
+                            "data-question"
+                        );
+
+                    sendMessage();
+
+                }
+            );
+
+        });
+
+
+    addMessage(
+        "Hi! I'm the Landslide Assistant. Ask me about the risk assessment, terrain, rainfall, model, dataset, or how the system works.",
+        "assistant"
+    );
+
+})();
+
+</script>
+
+</body>
+</html>

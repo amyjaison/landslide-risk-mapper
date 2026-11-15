@@ -1,0 +1,251 @@
+/* =========================================================
+   LANDSLIDE RISK MAPPER - LIGHTWEIGHT ASSISTANT
+   Completely independent module
+   ========================================================= */
+
+#assistant-open {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    width: 58px;
+    height: 58px;
+    border: none;
+    border-radius: 50%;
+    background: #14532d;
+    color: white;
+    font-size: 25px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    z-index: 9998;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+#assistant-open:hover {
+    transform: scale(1.07);
+    background: #166534;
+}
+
+
+#assistant-panel {
+    position: fixed;
+    right: 24px;
+    bottom: 94px;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    height: 500px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 18px;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    z-index: 9999;
+
+    display: flex;
+    flex-direction: column;
+
+    opacity: 0;
+    transform: translateY(15px) scale(0.96);
+    pointer-events: none;
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+#assistant-panel.assistant-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+
+.assistant-header {
+    background: #0f3d2e;
+    color: white;
+    padding: 16px 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+.assistant-header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.assistant-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #dcfce7;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 18px;
+}
+
+
+.assistant-title {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+
+.assistant-subtitle {
+    font-size: 11px;
+    opacity: 0.75;
+    margin-top: 2px;
+}
+
+
+#assistant-close {
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+
+#assistant-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #f8fafc;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+.assistant-message {
+    max-width: 88%;
+    padding: 10px 12px;
+    border-radius: 12px;
+
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+
+.bot-message {
+    align-self: flex-start;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+}
+
+
+.user-message {
+    align-self: flex-end;
+    background: #166534;
+    color: white;
+}
+
+
+.assistant-quick-questions {
+    padding: 8px 12px;
+
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+
+    border-top: 1px solid #e2e8f0;
+    background: white;
+}
+
+
+.assistant-quick-question {
+    flex-shrink: 0;
+
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+
+    border-radius: 20px;
+
+    padding: 6px 10px;
+
+    font-size: 11px;
+    cursor: pointer;
+}
+
+
+.assistant-quick-question:hover {
+    background: #dcfce7;
+}
+
+
+.assistant-input-area {
+    display: flex;
+    gap: 8px;
+
+    padding: 12px;
+
+    background: white;
+    border-top: 1px solid #e2e8f0;
+}
+
+
+#assistant-input {
+    flex: 1;
+
+    min-width: 0;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+
+    padding: 10px 12px;
+
+    font-size: 13px;
+    outline: none;
+}
+
+
+#assistant-input:focus {
+    border-color: #16a34a;
+}
+
+
+#assistant-send {
+    border: none;
+
+    width: 42px;
+    border-radius: 10px;
+
+    background: #166534;
+    color: white;
+
+    font-size: 17px;
+
+    cursor: pointer;
+}
+
+
+#assistant-send:hover {
+    background: #14532d;
+}
+
+
+@media (max-width: 600px) {
+
+    #assistant-panel {
+        right: 12px;
+        bottom: 82px;
+        width: calc(100vw - 24px);
+        height: 480px;
+    }
+
+    #assistant-open {
+        right: 16px;
+        bottom: 16px;
+    }
+}
