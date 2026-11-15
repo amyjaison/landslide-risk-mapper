@@ -1,50 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Landslide Assistant</title>
 
+
     <style>
+
         * {
             box-sizing: border-box;
         }
+
 
         html,
         body {
             margin: 0;
             padding: 0;
+
             width: 100%;
             height: 100%;
+
             font-family: Arial, sans-serif;
-            background: white;
+
+            background: #1e1f22;
         }
 
-        .assistant-wrapper {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+
+        body {
             overflow: hidden;
         }
 
+
+        /* =====================================================
+           MAIN ASSISTANT
+           ===================================================== */
+
+        .assistant-wrapper {
+
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            flex-direction: column;
+
+            overflow: hidden;
+
+        }
+
+
+        /* =====================================================
+           HEADER
+           ===================================================== */
+
         .assistant-header {
+
             height: 64px;
+
             flex-shrink: 0;
+
             background: #0f3d2e;
+
             color: white;
 
             display: flex;
             align-items: center;
+
             gap: 12px;
 
             padding: 10px 16px;
+
         }
 
+
         .assistant-icon {
+
             width: 38px;
             height: 38px;
+
+            flex-shrink: 0;
+
             border-radius: 10px;
 
             display: flex;
@@ -52,85 +94,153 @@
             justify-content: center;
 
             background: #dcfce7;
+
             color: #14532d;
 
             font-size: 20px;
+
         }
+
 
         .assistant-title {
+
             font-size: 15px;
+
             font-weight: 700;
+
         }
+
 
         .assistant-subtitle {
+
             font-size: 11px;
+
             opacity: 0.8;
+
             margin-top: 2px;
+
         }
 
+
+        /* =====================================================
+           MESSAGES
+           ===================================================== */
+
         .assistant-messages {
+
             flex: 1;
+
             min-height: 0;
 
             padding: 14px;
 
             overflow-y: auto;
 
-            background: #f8fafc;
+            background: #1e1f22;
 
             display: flex;
+
             flex-direction: column;
+
             gap: 10px;
+
         }
 
+
         .message {
+
             max-width: 88%;
+
             padding: 10px 12px;
 
             border-radius: 12px;
 
             font-size: 13px;
+
             line-height: 1.45;
 
             word-wrap: break-word;
+
         }
+
 
         .bot-message {
+
             align-self: flex-start;
 
-            background: white;
-            color: #1e293b;
+            background: #111111;
 
-            border: 1px solid #e2e8f0;
+            color: #f1f5f9;
+
+            border: 1px solid #444444;
+
         }
 
+
         .user-message {
+
             align-self: flex-end;
 
             background: #166534;
+
             color: white;
+
         }
+
+
+        /* =====================================================
+           QUICK QUESTIONS
+           ===================================================== */
 
         .quick-questions {
-            flex-shrink: 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 10px;
+    max-height: 76px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #111111;
+    border-top: 1px solid #3f3f46;
+}
+.quick-question {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
 
-            display: flex;
-            gap: 6px;
+        .quick-questions::-webkit-scrollbar {
 
-            padding: 8px 10px;
+            height: 6px;
 
-            overflow-x: auto;
-
-            background: white;
-            border-top: 1px solid #e2e8f0;
         }
 
+
+        .quick-questions::-webkit-scrollbar-track {
+
+            background: #1e1f22;
+
+        }
+
+
+        .quick-questions::-webkit-scrollbar-thumb {
+
+            background: #777777;
+
+            border-radius: 10px;
+
+        }
+
+
         .quick-question {
+
             flex-shrink: 0;
 
-            border: 1px solid #bbf7d0;
-            background: #f0fdf4;
-            color: #166534;
+            border: 1px solid #355c45;
+
+            background: #151d18;
+
+            color: #86efac;
 
             border-radius: 20px;
 
@@ -139,30 +249,46 @@
             font-size: 11px;
 
             cursor: pointer;
+
         }
+
 
         .quick-question:hover {
-            background: #dcfce7;
+
+            background: #183d27;
+
         }
 
+
+        /* =====================================================
+           INPUT
+           ===================================================== */
+
         .input-area {
+
             flex-shrink: 0;
 
             display: flex;
+
             gap: 8px;
 
             padding: 10px;
 
-            background: white;
+            background: #111111;
 
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #3f3f46;
+
         }
 
+
         #assistant-input {
+
             flex: 1;
+
             min-width: 0;
 
-            border: 1px solid #cbd5e1;
+            border: 1px solid #666666;
+
             border-radius: 10px;
 
             padding: 10px 12px;
@@ -170,36 +296,84 @@
             font-size: 13px;
 
             outline: none;
+
+            background: #3a3a3a;
+
+            color: white;
+
         }
+
+
+        #assistant-input::placeholder {
+
+            color: #aaaaaa;
+
+        }
+
 
         #assistant-input:focus {
+
             border-color: #16a34a;
+
         }
 
+
         #assistant-send {
+
             width: 42px;
+
             flex-shrink: 0;
 
             border: none;
+
             border-radius: 10px;
 
             background: #166534;
+
             color: white;
 
             font-size: 17px;
 
             cursor: pointer;
+
         }
 
+
         #assistant-send:hover {
+
             background: #14532d;
+
         }
+
+
+        /* =====================================================
+           MOBILE
+           ===================================================== */
+
+        @media (max-width: 600px) {
+
+            .message {
+
+                max-width: 92%;
+
+            }
+
+        }
+
     </style>
+
 </head>
+
 
 <body>
 
+
 <div class="assistant-wrapper">
+
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
 
     <div class="assistant-header">
 
@@ -208,6 +382,7 @@
         </div>
 
         <div>
+
             <div class="assistant-title">
                 Landslide Assistant
             </div>
@@ -215,10 +390,15 @@
             <div class="assistant-subtitle">
                 Landslide Risk Mapper
             </div>
+
         </div>
 
     </div>
 
+
+    <!-- =====================================================
+         MESSAGES
+         ===================================================== -->
 
     <div
         id="assistant-messages"
@@ -226,7 +406,12 @@
     ></div>
 
 
+    <!-- =====================================================
+         QUICK QUESTIONS
+         ===================================================== -->
+
     <div class="quick-questions">
+
 
         <button
             class="quick-question"
@@ -235,19 +420,22 @@
             Current Risk
         </button>
 
+
         <button
             class="quick-question"
-            data-question="What is the slope?"
+            data-question="Why does slope matter?"
         >
             Slope
         </button>
 
+
         <button
             class="quick-question"
-            data-question="What is the elevation?"
+            data-question="Why does elevation matter?"
         >
             Elevation
         </button>
+
 
         <button
             class="quick-question"
@@ -256,6 +444,7 @@
             Model
         </button>
 
+
         <button
             class="quick-question"
             data-question="How accurate is the model?"
@@ -263,15 +452,37 @@
             Accuracy
         </button>
 
+
         <button
             class="quick-question"
             data-question="How does this work?"
         >
-            How it works
+            How It Works
         </button>
+
+
+        <button
+            class="quick-question"
+            data-question="What dataset was used?"
+        >
+            Dataset
+        </button>
+
+
+        <button
+            class="quick-question"
+            data-question="What are the limitations?"
+        >
+            Limitations
+        </button>
+
 
     </div>
 
+
+    <!-- =====================================================
+         INPUT
+         ===================================================== -->
 
     <div class="input-area">
 
@@ -282,199 +493,1366 @@
             autocomplete="off"
         >
 
+
         <button
             id="assistant-send"
             type="button"
+            aria-label="Send"
         >
             ➤
         </button>
 
     </div>
 
+
 </div>
-
-
 <script>
-
 (function () {
 
-    const messages =
-        document.getElementById("assistant-messages");
+    const messages = document.getElementById("assistant-messages");
+    const input = document.getElementById("assistant-input");
+    const sendButton = document.getElementById("assistant-send");
 
-    const input =
-        document.getElementById("assistant-input");
+    /* =========================================================
+       READ VALUES FROM THE MAIN DASHBOARD
+       ========================================================= */
 
-    const sendButton =
-        document.getElementById("assistant-send");
+    function getDashboardValue(ids, fallback = "Not available") {
 
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+
+        try {
+
+            for (const id of ids) {
+
+                const element =
+                    window.parent.document.getElementById(id);
+
+                if (element) {
+
+                    const value =
+                        element.textContent.trim();
+
+                    if (value) {
+                        return value;
+                    }
+                }
+            }
+
+        } catch (error) {
+            return fallback;
+        }
+
+        return fallback;
+    }
+
+
+    function getCurrentData() {
+
+        return {
+
+            location: getDashboardValue(
+                [
+                    "dash-location-name",
+                    "location-name"
+                ],
+                "the selected location"
+            ),
+
+            coordinates: getDashboardValue(
+                [
+                    "dash-location-coords",
+                    "location-coords"
+                ],
+                "coordinates are not available"
+            ),
+
+            risk: getDashboardValue(
+                [
+                    "dash-risk-score"
+                ],
+                "not available"
+            ),
+
+            riskLevel: getDashboardValue(
+                [
+                    "dash-risk-badge"
+                ],
+                "not available"
+            ),
+
+            slope: getDashboardValue(
+                [
+                    "ml-slope-value",
+                    "dash-slope-value",
+                    "dash-slope"
+                ],
+                "not available"
+            ),
+
+            elevation: getDashboardValue(
+                [
+                    "ml-elevation-value",
+                    "dash-elevation-value",
+                    "dash-elev"
+                ],
+                "not available"
+            ),
+
+            rainfall: getDashboardValue(
+                [
+                    "dash-rain-72h"
+                ],
+                "not available"
+            ),
+
+            slopeCategory: getDashboardValue(
+                [
+                    "dash-slope-cat"
+                ],
+                "not available"
+            ),
+
+            terrain: getDashboardValue(
+                [
+                    "dash-terrain-type"
+                ],
+                "not available"
+            )
+        };
+    }
+
+
+    /* =========================================================
+       NORMALIZE QUESTION
+       ========================================================= */
+
+    function normalize(text) {
+
+        return text
+            .toLowerCase()
+            .replace(/[?!.,;:()[\]{}'"`]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+
+    function containsAny(text, phrases) {
+
+        return phrases.some(function (phrase) {
+            return text.includes(phrase);
+        });
+
+    }
+
+
+    /* =========================================================
+       ADD MESSAGE
+       ========================================================= */
 
     function addMessage(text, sender) {
 
-        const message =
-            document.createElement("div");
+    const message =
+        document.createElement("div");
 
-        message.className =
-            "message " +
-            (sender === "user"
+    message.className =
+        "message " +
+        (
+            sender === "user"
                 ? "user-message"
-                : "bot-message");
+                : "bot-message"
+        );
 
+    if (sender === "assistant") {
+        message.innerHTML = text;
+    } else {
         message.textContent = text;
-
-        messages.appendChild(message);
-
-        messages.scrollTop =
-            messages.scrollHeight;
     }
 
+    messages.appendChild(message);
+
+    messages.scrollTop =
+        messages.scrollHeight;
+}
+
+
+    /* =========================================================
+       RESPONSE ENGINE
+       ========================================================= */
 
     function getResponse(question) {
 
-        const q =
-            question.toLowerCase().trim();
+        const q = normalize(question);
 
+        const data = getCurrentData();
+
+
+        /* =====================================================
+           GREETINGS
+           ===================================================== */
 
         if (
-            q.includes("current risk") ||
-            q.includes("risk level") ||
-            q === "risk" ||
-            q.includes("risk now")
+            containsAny(q, [
+                "hello",
+                "hi",
+                "hii",
+                "hey",
+                "hello there",
+                "hey there",
+                "good morning",
+                "good afternoon",
+                "good evening"
+            ])
         ) {
 
-            return "The current landslide risk is shown on the Landslide Risk Mapper dashboard. Select a location on the map to view its latest risk assessment.";
+            return (
+                "Hi! 👋 I'm the Landslide Assistant. " +
+                "I can help you understand the current location, " +
+                "risk level, terrain, rainfall, machine-learning model, " +
+                "dataset, and project workflow."
+            );
 
         }
 
 
+        /* =====================================================
+           SIMPLE THANK YOU
+           ===================================================== */
+
         if (
-            q.includes("slope") ||
-            q.includes("steep")
+            containsAny(q, [
+                "thank you",
+                "thanks",
+                "thank u",
+                "thx"
+            ])
         ) {
 
-            return "Slope describes how steep the terrain is. Steeper slopes generally have higher landslide susceptibility.";
+            return (
+                "You're welcome! 😊 " +
+                "Feel free to ask me anything about the landslide assessment."
+            );
 
         }
 
 
-        if (
-            q.includes("elevation") ||
-            q.includes("height")
-        ) {
-
-            return "Elevation represents the height of the selected location above sea level. It is one of the terrain variables used by the system.";
-
-        }
-
-
-        if (
-            q.includes("rain") ||
-            q.includes("rainfall") ||
-            q.includes("precipitation")
-        ) {
-
-            return "Rainfall can increase landslide susceptibility, especially when heavy or prolonged rainfall saturates the soil.";
-
-        }
-
-
-        if (
-            q.includes("model") ||
-            q.includes("random forest") ||
-            q.includes("machine learning")
-        ) {
-
-            return "The Landslide Risk Mapper uses a Random Forest machine-learning model trained on the Mendeley landslide susceptibility dataset containing 12,409 samples.";
-
-        }
-
-
-        if (
-            q.includes("dataset") ||
-            q.includes("training data") ||
-            q.includes("data used")
-        ) {
-
-            return "The model was trained using the Mendeley landslide susceptibility dataset containing 12,409 samples.";
-
-        }
-
-
-        if (
-            q.includes("accuracy") ||
-            q.includes("performance") ||
-            q.includes("how accurate")
-        ) {
-
-            return "The Random Forest model achieved 75.99% accuracy, 74.25% precision, 83.23% recall, 78.48% F1-score and 83.05% ROC-AUC on the held-out test set.";
-
-        }
-
-
-        if (
-            q.includes("how does this work") ||
-            q.includes("how does it work") ||
-            q.includes("how it works")
-        ) {
-
-            return "You select a location, the system retrieves terrain and environmental information, calculates the relevant parameters, and the Random Forest model estimates landslide susceptibility. The result is displayed on the map and dashboard.";
-
-        }
-
-
-        if (
-            q.includes("factor") ||
-            q.includes("what affects") ||
-            q.includes("parameter")
-        ) {
-
-            return "The system works with terrain and environmental information such as slope, elevation, rainfall and historical landslide information. The current Random Forest model uses slope and elevation as its prediction features.";
-
-        }
-
-
-        if (
-            q.includes("low risk")
-        ) {
-
-            return "Low Risk means the model estimates relatively low landslide susceptibility for the selected location. It is a screening result, not a guarantee that a landslide cannot occur.";
-
-        }
-
-
-        if (
-            q.includes("high risk") ||
-            q.includes("very high risk")
-        ) {
-
-            return "A High or Very High Risk result indicates higher estimated landslide susceptibility. It should be interpreted as decision-support information rather than an exact prediction.";
-
-        }
-
-
-        if (
-            q.includes("safe") ||
-            q.includes("dangerous")
-        ) {
-
-            return "The application is designed for screening and decision support. It does not predict the exact timing of a landslide, so official warnings and local authorities should always be followed.";
-
-        }
-
+        /* =====================================================
+           HELP
+           ===================================================== */
 
         if (
             q === "help" ||
-            q.includes("what can you do")
+            containsAny(q, [
+                "what can you do",
+                "what can i ask",
+                "what questions can i ask",
+                "what should i ask",
+                "show me questions"
+            ])
         ) {
 
-            return "You can ask me about landslide risk, slope, elevation, rainfall, the Random Forest model, the dataset, model accuracy, or how the Landslide Risk Mapper works.";
+            return (
+                "You can ask me about:<br><br>" +
+
+                "• Current location<br>" +
+                "• Current risk<br>" +
+                "• Why the location is risky<br>" +
+                "• Risk factors<br>" +
+                "• Slope<br>" +
+                "• Why slope matters<br>" +
+                "• Elevation<br>" +
+                "• Why elevation matters<br>" +
+                "• Rainfall<br>" +
+                "• Why rainfall matters<br>" +
+                "• Random Forest<br>" +
+                "• Dataset<br>" +
+                "• Model accuracy<br>" +
+                "• Precision, recall and F1<br>" +
+                "• System workflow<br>" +
+                "• Project objective<br>" +
+                "• Limitations"
+            );
 
         }
 
 
-        return "I can help explain the landslide risk, slope, elevation, rainfall, Random Forest model, dataset, accuracy, and how the Landslide Risk Mapper works.";
+        /* =====================================================
+           CURRENT LOCATION
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "where am i",
+                "where are we",
+                "where is this",
+                "what location",
+                "which location",
+                "current location",
+                "selected location",
+                "location here",
+                "location now",
+                "what place",
+                "which place",
+                "current place",
+                "selected place",
+                "place here"
+            ])
+        ) {
+
+            return (
+                "📍 The currently selected location is " +
+                data.location +
+                ". " +
+                data.coordinates
+            );
+
+        }
+
+
+        /* =====================================================
+           CURRENT RISK
+           ===================================================== */
+
+        if (
+            q === "risk" ||
+            q === "risk level" ||
+            q === "risk score" ||
+            containsAny(q, [
+                "current risk",
+                "risk now",
+                "what is the risk",
+                "what s the risk",
+                "whats the risk",
+                "how risky is it",
+                "how risky is this",
+                "how risky is the location",
+                "how much risk",
+                "risk at this location",
+                "risk of this location",
+                "landslide risk",
+                "landslide danger",
+                "danger level",
+                "is it risky",
+                "is this risky",
+                "is this location risky",
+                "is this place risky"
+            ])
+        ) {
+
+            return (
+                "⚠️ For " +
+                data.location +
+                ", the current landslide risk score is " +
+                data.risk +
+                "/100 and the system classifies it as " +
+                data.riskLevel +
+                "."
+            );
+
+        }
+
+
+        /* =====================================================
+           WHY IS IT RISKY?
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "why is it risky",
+                "why is this risky",
+                "why is the location risky",
+                "why is this location risky",
+                "why is this place risky",
+                "why is the place risky",
+                "why risky",
+                "why is it dangerous",
+                "why is this dangerous",
+                "why is the risk high",
+                "why is the risk moderate",
+                "why is the risk low",
+                "why is the landslide risk high",
+                "why is the landslide risk moderate",
+                "why is the landslide risk low",
+                "why is there risk",
+                "why does it have risk",
+                "reason for the risk",
+                "reason for risk",
+                "what makes it risky",
+                "what makes this risky",
+                "what causes the risk",
+                "what is causing the risk",
+                "why does this location have risk"
+            ])
+        ) {
+
+            return (
+                "⚠️ The location currently has a risk score of " +
+                data.risk +
+                "/100 and is classified as " +
+                data.riskLevel +
+                ". " +
+
+                "The Random Forest model mainly uses slope and " +
+                "elevation to estimate landslide susceptibility. " +
+
+                "The current slope is " +
+                data.slope +
+                " and the elevation is " +
+                data.elevation +
+                ". " +
+
+                "Steeper terrain can generally be more susceptible " +
+                "to slope failure, which is why terrain characteristics " +
+                "are important in the assessment."
+            );
+
+        }
+
+
+        /* =====================================================
+           WHY HIGH / LOW / MODERATE
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "why high risk",
+                "why high",
+                "why is risk high",
+                "why moderate risk",
+                "why moderate",
+                "why low risk",
+                "why low"
+            ])
+        ) {
+
+            return (
+                "The current classification is " +
+                data.riskLevel +
+                " with a score of " +
+                data.risk +
+                "/100. " +
+
+                "This classification comes from the Random Forest " +
+                "model's estimated landslide susceptibility probability, " +
+                "using slope and elevation as the current model inputs."
+            );
+
+        }
+
+
+        /* =====================================================
+           RISK FACTORS
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "risk factors",
+                "factors affecting risk",
+                "factors affect risk",
+                "factors affecting the risk",
+                "what affects risk",
+                "what affects the risk",
+                "what influences risk",
+                "what influences the risk",
+                "what determines risk",
+                "what determines the risk",
+                "what contributes to risk",
+                "what contributes to the risk",
+                "important risk factors",
+                "main risk factors"
+            ])
+        ) {
+
+            return (
+                "🔎 The main features used by the current Random Forest " +
+                "model are slope and elevation. " +
+
+                "Slope represents how steep the terrain is, while " +
+                "elevation represents the height of the location. " +
+
+                "Rainfall is also displayed by the dashboard as an " +
+                "environmental indicator."
+            );
+
+        }
+
+
+        /* =====================================================
+           LOCATION SUMMARY
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "summarize this",
+                "summarize the location",
+                "location summary",
+                "give me a summary",
+                "summary of this location",
+                "explain this location",
+                "explain the location",
+                "tell me about this location",
+                "give me the current details"
+            ])
+        ) {
+
+            return (
+                "📍 Location: " +
+                data.location +
+                ". " +
+
+                "Risk: " +
+                data.risk +
+                "/100 (" +
+                data.riskLevel +
+                "). " +
+
+                "Slope: " +
+                data.slope +
+                ". " +
+
+                "Elevation: " +
+                data.elevation +
+                ". " +
+
+                "Displayed rainfall: " +
+                data.rainfall +
+                "."
+            );
+
+        }
+
+
+        /* =====================================================
+           SLOPE
+           ===================================================== */
+
+        if (
+            q === "slope" ||
+            q === "slope value" ||
+            containsAny(q, [
+                "what is the slope",
+                "what s the slope",
+                "whats the slope",
+                "current slope",
+                "slope here",
+                "slope at this location",
+                "slope of this location",
+                "how steep",
+                "how steep is it",
+                "how steep is this",
+                "how steep is the location",
+                "terrain slope"
+            ])
+        ) {
+
+            return (
+                "📐 The current slope at " +
+                data.location +
+                " is " +
+                data.slope +
+                ". " +
+
+                "Slope describes how steep the terrain is and is " +
+                "one of the two features used by the current Random " +
+                "Forest model."
+            );
+
+        }
+
+
+        /* =====================================================
+           WHY SLOPE MATTERS
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "why does slope matter",
+                "why is slope important",
+                "why slope matters",
+                "why slope is important",
+                "why do we need slope",
+                "how does slope affect risk",
+                "how does slope affect landslides",
+                "does slope affect risk",
+                "does slope affect landslides",
+                "importance of slope",
+                "what is the importance of slope",
+                "why is slope used"
+            ])
+        ) {
+
+            return (
+                "📐 Slope matters because steeper terrain can be " +
+                "more susceptible to gravitational movement and " +
+                "slope failure. " +
+
+                "That is why slope is an important input for the " +
+                "landslide susceptibility model."
+            );
+
+        }
+
+
+        /* =====================================================
+           ELEVATION
+           ===================================================== */
+
+        if (
+            q === "elevation" ||
+            q === "elevation value" ||
+            containsAny(q, [
+                "what is the elevation",
+                "what s the elevation",
+                "whats the elevation",
+                "current elevation",
+                "elevation here",
+                "elevation at this location",
+                "elevation of this location",
+                "how high is it",
+                "how high is this location",
+                "height of the location"
+            ])
+        ) {
+
+            return (
+                "⛰️ The current elevation at " +
+                data.location +
+                " is " +
+                data.elevation +
+                ". " +
+
+                "Elevation describes the height of the location " +
+                "and is one of the prediction features used by " +
+                "the Random Forest model."
+            );
+
+        }
+
+
+        /* =====================================================
+           WHY ELEVATION MATTERS
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "why does elevation matter",
+                "why is elevation important",
+                "why elevation matters",
+                "why elevation is important",
+                "why do we need elevation",
+                "how does elevation affect risk",
+                "does elevation affect risk",
+                "importance of elevation",
+                "what is the importance of elevation",
+                "why is elevation used"
+            ])
+        ) {
+
+            return (
+                "⛰️ Elevation provides information about the terrain " +
+                "and landscape characteristics of a location. " +
+
+                "The Random Forest model uses elevation together " +
+                "with slope to estimate landslide susceptibility."
+            );
+
+        }
+
+
+        /* =====================================================
+           RAINFALL
+           ===================================================== */
+
+        if (
+            q === "rain" ||
+            q === "rainfall" ||
+            q === "precipitation" ||
+            containsAny(q, [
+                "what is the rainfall",
+                "what s the rainfall",
+                "whats the rainfall",
+                "current rainfall",
+                "rainfall here",
+                "rainfall at this location",
+                "rainfall value",
+                "how much rain",
+                "how much rainfall",
+                "rain here",
+                "precipitation here",
+                "current precipitation"
+            ])
+        ) {
+
+            return (
+                "🌧️ The dashboard currently displays " +
+                data.rainfall +
+                " for the selected location. " +
+
+                "Rainfall is an important environmental indicator " +
+                "because heavy or prolonged rainfall can affect " +
+                "slope stability."
+            );
+
+        }
+
+
+        /* =====================================================
+           WHY RAINFALL MATTERS
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "why does rainfall matter",
+                "why is rainfall important",
+                "why rainfall matters",
+                "why rain matters",
+                "why does rain matter",
+                "how does rainfall affect risk",
+                "how does rainfall affect landslides",
+                "how does rain affect landslides",
+                "does rainfall affect risk",
+                "does rain affect risk",
+                "importance of rainfall",
+                "why is rainfall used"
+            ])
+        ) {
+
+            return (
+                "🌧️ Rainfall can increase soil moisture and saturation. " +
+                "Heavy or prolonged rainfall can reduce slope stability " +
+                "and contribute to landslide susceptibility. " +
+
+                "In the current Random Forest model, however, the two " +
+                "prediction features are slope and elevation."
+            );
+
+        }
+
+
+        /* =====================================================
+           MODEL
+           ===================================================== */
+
+        if (
+            q === "model" ||
+            q === "ml model" ||
+            q === "machine learning" ||
+            q === "machine learning model" ||
+            q === "algorithm" ||
+            q === "model used" ||
+            containsAny(q, [
+                "what model",
+                "which model",
+                "what ml model",
+                "which ml model",
+                "what machine learning model",
+                "which machine learning model",
+                "what algorithm is used",
+                "which algorithm is used",
+                "what algorithm are you using",
+                "what model are you using",
+                "which model are you using",
+                "what ml algorithm"
+            ])
+        ) {
+
+            return (
+                "🤖 The Landslide Risk Mapper uses a " +
+                "Random Forest Classifier for its current " +
+                "machine-learning prediction."
+            );
+
+        }
+
+
+        /* =====================================================
+           RANDOM FOREST EXPLANATION
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "what is random forest",
+                "explain random forest",
+                "random forest meaning",
+                "random forest explained",
+                "how does random forest work",
+                "how random forest works"
+            ])
+        ) {
+
+            return (
+                "🌲 Random Forest is a machine-learning algorithm " +
+                "that combines predictions from multiple decision " +
+                "trees. This helps it capture non-linear relationships " +
+                "in structured environmental data and produce a more " +
+                "robust prediction."
+            );
+
+        }
+
+
+        /* =====================================================
+           WHY RANDOM FOREST
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "why random forest",
+                "why use random forest",
+                "why did you use random forest",
+                "why was random forest used",
+                "why choose random forest",
+                "why this model",
+                "why this algorithm",
+                "advantages of random forest"
+            ])
+        ) {
+
+            return (
+                "🌲 Random Forest was chosen because it can model " +
+                "non-linear relationships between environmental " +
+                "features and landslide susceptibility. It also " +
+                "works well with structured tabular datasets and " +
+                "is practical to deploy."
+            );
+
+        }
+
+
+        /* =====================================================
+           DATASET
+           ===================================================== */
+
+        if (
+            q === "dataset" ||
+            q === "data" ||
+            q === "training data" ||
+            containsAny(q, [
+                "what dataset",
+                "which dataset",
+                "what data was used",
+                "what data did you use",
+                "dataset used",
+                "dataset was used",
+                "training dataset",
+                "training data used",
+                "where did the data come from",
+                "where is the dataset from",
+                "data source",
+                "dataset source"
+            ])
+        ) {
+
+            return (
+                "📊 The model was trained using the " +
+                "Geo-Environmental Feature Dataset for Landslide " +
+                "Susceptibility Modelling in Himachal Pradesh, India. " +
+
+                "The modelling dataset contains 12,409 samples."
+            );
+
+        }
+
+
+        /* =====================================================
+           DATASET SIZE
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "how many samples",
+                "how many records",
+                "how many rows",
+                "dataset size",
+                "size of the dataset",
+                "number of samples",
+                "number of records",
+                "how big is the dataset"
+            ])
+        ) {
+
+            return (
+                "📊 The modelling dataset contains " +
+                "12,409 samples."
+            );
+
+        }
+
+
+        /* =====================================================
+           FEATURES
+           ===================================================== */
+
+        if (
+            q === "features" ||
+            containsAny(q, [
+                "what features",
+                "which features",
+                "features used",
+                "what inputs",
+                "input features",
+                "model inputs",
+                "what does the model use",
+                "what variables are used",
+                "prediction features"
+            ])
+        ) {
+
+            return (
+                "🧩 The current Random Forest model uses two " +
+                "prediction features: slope in degrees and " +
+                "elevation in metres."
+            );
+
+        }
+
+
+        /* =====================================================
+           ACCURACY
+           ===================================================== */
+
+        if (
+            q === "accuracy" ||
+            containsAny(q, [
+                "what is the accuracy",
+                "what s the accuracy",
+                "whats the accuracy",
+                "model accuracy",
+                "how accurate is the model",
+                "how accurate is it",
+                "how good is the model"
+            ])
+        ) {
+
+            return (
+                "📈 The Random Forest model achieved " +
+                "75.99% accuracy on the held-out test set."
+            );
+
+        }
+
+
+        /* =====================================================
+           PRECISION
+           ===================================================== */
+
+        if (
+            q === "precision" ||
+            containsAny(q, [
+                "what is precision",
+                "model precision",
+                "precision score"
+            ])
+        ) {
+
+            return (
+                "📈 The model achieved 74.25% precision " +
+                "on the held-out test set."
+            );
+
+        }
+
+
+        /* =====================================================
+           RECALL
+           ===================================================== */
+
+        if (
+            q === "recall" ||
+            containsAny(q, [
+                "what is recall",
+                "model recall",
+                "recall score",
+                "sensitivity"
+            ])
+        ) {
+
+            return (
+                "📈 The model achieved 83.23% recall on " +
+                "the held-out test set."
+            );
+
+        }
+
+
+        /* =====================================================
+           F1 SCORE
+           ===================================================== */
+
+        if (
+            q === "f1" ||
+            q === "f1 score" ||
+            containsAny(q, [
+                "what is f1",
+                "what is f1 score",
+                "model f1",
+                "f1 performance"
+            ])
+        ) {
+
+            return (
+                "📈 The model achieved an F1 score of " +
+                "78.48% on the held-out test set."
+            );
+
+        }
+
+
+        /* =====================================================
+           ROC-AUC
+           ===================================================== */
+
+        if (
+            q === "auc" ||
+            q === "roc" ||
+            q === "roc auc" ||
+            containsAny(q, [
+                "what is auc",
+                "what is roc",
+                "what is roc auc",
+                "roc auc score",
+                "model auc"
+            ])
+        ) {
+
+            return (
+                "📈 The model achieved an ROC-AUC score of " +
+                "83.05% on the held-out test set."
+            );
+
+        }
+
+
+        /* =====================================================
+           ALL METRICS
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "all metrics",
+                "model metrics",
+                "performance metrics",
+                "show metrics",
+                "give me the metrics",
+                "model performance",
+                "how did the model perform",
+                "model results"
+            ])
+        ) {
+
+            return (
+                "📊 Random Forest model performance:<br><br>" +
+
+                "Accuracy: 75.99%<br>" +
+                "Precision: 74.25%<br>" +
+                "Recall: 83.23%<br>" +
+                "F1 Score: 78.48%<br>" +
+                "ROC-AUC: 83.05%"
+            );
+
+        }
+
+
+        /* =====================================================
+           HOW THE SYSTEM WORKS
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "how does it work",
+                "how does this work",
+                "how does the system work",
+                "how does the project work",
+                "how it works",
+                "system workflow",
+                "project workflow",
+                "what is the workflow",
+                "explain the workflow",
+                "explain the process",
+                "how is the risk calculated",
+                "how do you calculate risk",
+                "how is risk calculated"
+            ])
+        ) {
+
+            return (
+                "🔄 The workflow is:<br><br>" +
+
+                "1. You select a location.<br>" +
+                "2. The system obtains geographic and environmental information.<br>" +
+                "3. Terrain characteristics such as slope and elevation are determined.<br>" +
+                "4. The Random Forest model processes the prediction features.<br>" +
+                "5. The model estimates landslide susceptibility.<br>" +
+                "6. The result is converted into a risk score and category.<br>" +
+                "7. The dashboard displays the result visually."
+            );
+
+        }
+
+
+        /* =====================================================
+           WHAT HAPPENS AFTER SELECTING LOCATION
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "what happens when i select a location",
+                "what happens after selecting a location",
+                "what happens after i select",
+                "after selecting a location",
+                "when i select a location",
+                "when a location is selected"
+            ])
+        ) {
+
+            return (
+                "Once you select a location, the system retrieves " +
+                "the relevant geographic and environmental information, " +
+                "performs terrain analysis, and sends the required " +
+                "features to the Random Forest model. The resulting " +
+                "susceptibility assessment is then shown on the dashboard."
+            );
+
+        }
+
+
+        /* =====================================================
+           RISK SCORE MEANING
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "what does the risk score mean",
+                "what does risk score mean",
+                "meaning of risk score",
+                "risk score meaning",
+                "what does the score mean"
+            ])
+        ) {
+
+            return (
+                "The risk score represents the model's estimated " +
+                "landslide susceptibility for the selected location. " +
+
+                "The current score is " +
+                data.risk +
+                "/100 and the classification is " +
+                data.riskLevel +
+                "."
+            );
+
+        }
+
+
+        /* =====================================================
+           LOW RISK
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "what does low risk mean",
+                "meaning of low risk",
+                "what is low risk"
+            ])
+        ) {
+
+            return (
+                "Low Risk means the model estimates relatively lower " +
+                "landslide susceptibility for the selected location. " +
+                "It does not mean a landslide is impossible."
+            );
+
+        }
+
+
+        /* =====================================================
+           MODERATE RISK
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "what does moderate risk mean",
+                "meaning of moderate risk",
+                "what is moderate risk"
+            ])
+        ) {
+
+            return (
+                "Moderate Risk indicates an intermediate estimated " +
+                "level of landslide susceptibility for the selected location."
+            );
+
+        }
+
+
+        /* =====================================================
+           HIGH RISK
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "what does high risk mean",
+                "meaning of high risk",
+                "what is high risk"
+            ])
+        ) {
+
+            return (
+                "High Risk indicates a higher estimated level of " +
+                "landslide susceptibility. It should be treated as " +
+                "decision-support information rather than a guarantee " +
+                "that a landslide will occur."
+            );
+
+        }
+
+
+        /* =====================================================
+           LIMITATIONS
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "limitations",
+                "limitation",
+                "what are the limitations",
+                "what are its limitations",
+                "is it always accurate",
+                "can it be wrong",
+                "can the model be wrong",
+                "is the prediction guaranteed",
+                "can i trust the prediction",
+                "how reliable is it"
+            ])
+        ) {
+
+            return (
+                "⚠️ The system provides a machine-learning-based " +
+                "landslide susceptibility estimate. It is not a " +
+                "guaranteed prediction of an actual landslide event. " +
+
+                "Real-world landslides can also depend on factors " +
+                "such as geology, soil properties, drainage, rainfall, " +
+                "land use, vegetation and human activity."
+            );
+
+        }
+
+
+        /* =====================================================
+           CAN IT PREDICT WHEN A LANDSLIDE WILL HAPPEN?
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "can it predict when",
+                "can it predict the time",
+                "predict exact time",
+                "predict exact date",
+                "predict when a landslide",
+                "when will the landslide happen",
+                "will a landslide happen",
+                "can it predict a landslide"
+            ])
+        ) {
+
+            return (
+                "No. The system estimates landslide susceptibility " +
+                "for a selected location. It does not predict the " +
+                "exact date or time when a landslide will occur."
+            );
+
+        }
+
+
+        /* =====================================================
+           PROJECT
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "what is this project",
+                "what is the project",
+                "what is this application",
+                "tell me about the project",
+                "tell me about this project",
+                "what is this system",
+                "about this project",
+                "project about"
+            ])
+        ) {
+
+            return (
+                "🌍 Landslide Risk Mapper is an AI-powered web " +
+                "application for landslide susceptibility assessment " +
+                "and risk visualization. " +
+
+                "It combines geographic and environmental information " +
+                "with a Random Forest machine-learning model and " +
+                "presents the results through an interactive dashboard."
+            );
+
+        }
+
+
+        /* =====================================================
+           PROJECT OBJECTIVE
+           ===================================================== */
+
+        if (
+            containsAny(q, [
+                "objective",
+                "project objective",
+                "main objective",
+                "what is the objective",
+                "what is the main goal",
+                "main goal",
+                "purpose of the project",
+                "why was this project made"
+            ])
+        ) {
+
+            return (
+                "🎯 The main objective is to assess and visualize " +
+                "landslide susceptibility for selected locations " +
+                "using geospatial information and machine learning, " +
+                "so that the results are easier to understand through " +
+                "an interactive map and dashboard."
+            );
+
+        }
+
+
+        /* =====================================================
+           FALLBACK
+           ===================================================== */
+
+        return (
+            "I'm not sure I understood that question. 😊<br><br>" +
+
+            "Try asking something like:<br>" +
+
+            "• Why is it risky?<br>" +
+            "• What is the current risk?<br>" +
+            "• What is the slope?<br>" +
+            "• Why does slope matter?<br>" +
+            "• What is the elevation?<br>" +
+            "• What is the rainfall?<br>" +
+            "• What model are you using?<br>" +
+            "• Why Random Forest?<br>" +
+            "• What dataset was used?<br>" +
+            "• What is the accuracy?<br>" +
+            "• How does the system work?"
+        );
 
     }
 
+
+    /* =========================================================
+       SEND MESSAGE
+       ========================================================= */
 
     function sendMessage() {
 
@@ -485,27 +1863,41 @@
             return;
         }
 
-        addMessage(question, "user");
+        addMessage(
+            question,
+            "user"
+        );
 
         input.value = "";
 
         setTimeout(function () {
 
+            const response =
+                getResponse(question);
+
             addMessage(
-                getResponse(question),
+                response,
                 "assistant"
             );
 
-        }, 200);
+        }, 180);
 
     }
 
+
+    /* =========================================================
+       SEND BUTTON
+       ========================================================= */
 
     sendButton.addEventListener(
         "click",
         sendMessage
     );
 
+
+    /* =========================================================
+       ENTER KEY
+       ========================================================= */
 
     input.addEventListener(
         "keydown",
@@ -523,6 +1915,10 @@
     );
 
 
+    /* =========================================================
+       QUICK QUESTION BUTTONS
+       ========================================================= */
+
     document
         .querySelectorAll(".quick-question")
         .forEach(function (button) {
@@ -531,10 +1927,10 @@
                 "click",
                 function () {
 
-                    input.value =
-                        button.getAttribute(
-                            "data-question"
-                        );
+                    const question =
+                        button.getAttribute("data-question");
+
+                    input.value = question;
 
                     sendMessage();
 
@@ -544,14 +1940,18 @@
         });
 
 
+    /* =========================================================
+       INITIAL MESSAGE
+       ========================================================= */
+
     addMessage(
-        "Hi! I'm the Landslide Assistant. Ask me about the risk assessment, terrain, rainfall, model, dataset, or how the system works.",
+        "Hi! 👋 I'm the Landslide Assistant. Ask me about the current location, risk, why it is risky, slope, elevation, rainfall, the Random Forest model, dataset, accuracy, or how the system works.",
         "assistant"
     );
 
 })();
-
 </script>
 
 </body>
+
 </html>
