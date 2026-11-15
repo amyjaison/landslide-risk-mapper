@@ -107,7 +107,7 @@ class TestLandslideRiskMapperAPI(unittest.TestCase):
         # Methodology
         r_method = self.client.get('/methodology')
         self.assertEqual(r_method.status_code, 200)
-        self.assertIn(b"Weighted Overlay", r_method.data)
+        self.assertIn(b"Random Forest", r_method.data)
 
         # Data Sources
         r_sources = self.client.get('/data-sources')

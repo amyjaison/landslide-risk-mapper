@@ -1,6 +1,6 @@
 # Landslide Risk Mapper — Web-Based GIS Geospatial Tool
 
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/framework-Flask-black.svg)](https://flask.palletsprojects.com/)
 [![Leaflet.js](https://img.shields.io/badge/gis-Leaflet.js-brightgreen.svg)](https://leafletjs.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -54,7 +54,7 @@ An end-to-end interactive Geographic Information System (GIS) and multi-criteria
 ## 3. Technology Stack
 
 - **Backend:**
-  - Python 3.9+
+  - Python 3.11 (the version Render uses)
   - Flask 3.1.3 (RESTful API & Web Application)
   - Flask-CORS 6.0.5
   - Rasterio 1.4.3 (GeoTIFF generation, geospatial affine transforms, CRS handling)
@@ -188,7 +188,7 @@ $$\text{Landslide Vulnerability Score} = (S_{\text{slope}} \times w_{\text{slope
 ## 7. Installation Instructions
 
 ### Prerequisites
-- Python 3.9, 3.10, 3.11, or 3.12
+- Python 3.11 (the version pinned in .python-version; newer versions may fail to install the pinned packages)
 - `pip` package manager
 - Internet access for initial package downloads and live API queries (offline fallback active if offline)
 

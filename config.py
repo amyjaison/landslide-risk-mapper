@@ -4,8 +4,8 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     BASE_DIR = BASE_DIR
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'landslide-risk-mapper-secret-2026')
-    DEBUG = os.environ.get('FLASK_DEBUG', '1') == '1'
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-only-change-me')  # set SECRET_KEY on Render
+    DEBUG = os.environ.get('FLASK_DEBUG', '0') == '1'  # off unless FLASK_DEBUG=1
     PORT = int(os.environ.get('PORT', 5050))
     HOST = os.environ.get('HOST', '0.0.0.0')
 

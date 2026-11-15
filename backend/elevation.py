@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import requests
 import numpy as np
 import rasterio
@@ -148,67 +149,25 @@ class ElevationService:
         # OPEN-METEO LIVE ELEVATION API
         # ---------------------------------------------------------
 
-        try:
-
-            url = "https://api.open-meteo.com/v1/elevation"
-
-            params = {
-                "latitude": ",".join(
-                    map(str, lat_list)
-                ),
-                "longitude": ",".join(
-                    map(str, lon_list)
-                )
-            }
-
-            headers = {
-                "User-Agent": "Landslide-Risk-Mapper/1.0"
-            }
-
-            response = requests.get(
-                url,
-                params=params,
-                headers=headers,
-                timeout=20
-            )
-
-            response.raise_for_status()
-
-            data = response.json()
-
-            elevations = data.get(
-                "elevation",
-                []
-            )
-
-            if (
-                len(elevations) == len(lat_list)
-                and all(
-                    value is not None
-                    for value in elevations
-                )
-            ):
-
+        # Try providers in order. Shared cloud IPs (e.g. Render) are often
+        # rate-limited by a single provider, so one failure must not drop
+        # us straight to the fake terrain model.
+        for provider_name, fetcher in (
+            ("SRTM / Copernicus DEM (Open-Meteo Live API)",
+             self._fetch_open_meteo),
+            ("SRTM 30m (OpenTopoData Live API)",
+             self._fetch_opentopodata),
+        ):
+            values = fetcher(lat_list, lon_list)
+            if values is not None:
                 elevation_matrix = np.array(
-                    elevations,
-                    dtype=np.float32
-                ).reshape(
-                    (grid_size, grid_size)
-                )
-
-                # Reject invalid API output.
-                if np.any(
-                    ~np.isfinite(elevation_matrix)
-                ):
-
+                    values, dtype=np.float32
+                ).reshape((grid_size, grid_size))
+                if np.any(~np.isfinite(elevation_matrix)):
                     elevation_matrix = None
-
-        except Exception as e:
-
-            print(
-                "[Warning] Open-Meteo elevation API "
-                f"failed: {e}"
-            )
+                    continue
+                source_name = provider_name
+                break
 
         # ---------------------------------------------------------
         # DETERMINISTIC FALLBACK
@@ -366,6 +325,64 @@ class ElevationService:
             )
 
         return result
+
+    # =============================================================
+    # LIVE ELEVATION PROVIDERS (each returns a flat list or None)
+    # =============================================================
+
+    HEADERS = {"User-Agent": "Landslide-Risk-Mapper/1.0"}
+
+    def _fetch_open_meteo(self, lat_list, lon_list):
+        for attempt in range(3):
+            try:
+                response = requests.get(
+                    "https://api.open-meteo.com/v1/elevation",
+                    params={
+                        "latitude": ",".join(map(str, lat_list)),
+                        "longitude": ",".join(map(str, lon_list)),
+                    },
+                    headers=self.HEADERS,
+                    timeout=20,
+                )
+                response.raise_for_status()
+                values = response.json().get("elevation", [])
+                if (
+                    len(values) == len(lat_list)
+                    and all(v is not None for v in values)
+                ):
+                    return values
+                return None
+            except Exception as e:
+                print(f"[Warning] Open-Meteo elevation attempt {attempt + 1} failed: {e}")
+                time.sleep(1.5 * (attempt + 1))
+        return None
+
+    def _fetch_opentopodata(self, lat_list, lon_list):
+        # Public API allows max 100 locations per request.
+        for attempt in range(2):
+            try:
+                locations = "|".join(
+                    f"{la},{lo}" for la, lo in zip(lat_list, lon_list)
+                )
+                response = requests.get(
+                    "https://api.opentopodata.org/v1/srtm30m",
+                    params={"locations": locations},
+                    headers=self.HEADERS,
+                    timeout=25,
+                )
+                response.raise_for_status()
+                results = response.json().get("results", [])
+                values = [r.get("elevation") for r in results]
+                if (
+                    len(values) == len(lat_list)
+                    and all(v is not None for v in values)
+                ):
+                    return values
+                return None
+            except Exception as e:
+                print(f"[Warning] OpenTopoData attempt {attempt + 1} failed: {e}")
+                time.sleep(2)
+        return None
 
     # =============================================================
     # GEOTIFF

@@ -986,4 +986,66 @@ class DataLoaderService:
             # not break the application.
             pass
 
+        # ============================================================
+        # 6. BACKUP GEOCODERS
+        # ============================================================
+        # Nominatim often rejects requests from shared cloud hosts
+        # (such as Render). If it gave us nothing, try other free
+        # geocoders instead of returning an empty list.
+
+        if not results:
+            for geocoder in (self._geocode_open_meteo, self._geocode_photon):
+                try:
+                    for la, lo, name, kind in geocoder(query_str):
+                        coord_key = (round(la, 3), round(lo, 3))
+                        if coord_key in seen_coords:
+                            continue
+                        seen_coords.add(coord_key)
+                        results.append({
+                            "display_name": name,
+                            "lat": la,
+                            "lon": lo,
+                            "type": kind
+                        })
+                except Exception:
+                    continue
+                if results:
+                    break
+
         return results
+
+    @staticmethod
+    def _geocode_open_meteo(query_str):
+        resp = requests.get(
+            "https://geocoding-api.open-meteo.com/v1/search",
+            params={"name": query_str, "count": 6, "language": "en"},
+            headers={"User-Agent": "LandslideRiskMapper/1.0"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        out = []
+        for it in resp.json().get("results", []) or []:
+            parts = [it.get("name"), it.get("admin1"), it.get("country")]
+            out.append((
+                float(it["latitude"]), float(it["longitude"]),
+                ", ".join(p for p in parts if p),
+                it.get("feature_code", "location"),
+            ))
+        return out
+
+    @staticmethod
+    def _geocode_photon(query_str):
+        resp = requests.get(
+            "https://photon.komoot.io/api/",
+            params={"q": query_str, "limit": 6, "lang": "en"},
+            headers={"User-Agent": "LandslideRiskMapper/1.0"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        out = []
+        for f in resp.json().get("features", []):
+            lo, la = f["geometry"]["coordinates"][:2]
+            pr = f.get("properties", {})
+            parts = [pr.get("name"), pr.get("state"), pr.get("country")]
+            out.append((float(la), float(lo), ", ".join(p for p in parts if p), pr.get("osm_value", "location")))
+        return out

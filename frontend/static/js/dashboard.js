@@ -713,7 +713,43 @@ const DashboardModule = (() => {
   // UPDATE DASHBOARD
   // ---------------------------------------------------------
 
+  // Warn the user whenever any input is estimated instead of measured.
+  function updateDataNotice(data) {
+    const box = document.getElementById("data-notice");
+    if (!box) { return; }
+
+    const notes = [];
+    if (data.elevation && data.elevation.is_fallback) {
+      notes.push(
+        "Elevation could not be fetched, so an approximate offline " +
+        "terrain model was used. The score may be inaccurate."
+      );
+    }
+    if (data.rainfall && data.rainfall.is_fallback) {
+      notes.push(
+        "Live rainfall could not be fetched, so typical regional " +
+        "rainfall was used."
+      );
+    }
+    if (data.rainfall && data.rainfall.is_simulation) {
+      notes.push(
+        "Rainfall shown is a simulated disaster-peak scenario, " +
+        "not current weather."
+      );
+    }
+
+    if (notes.length) {
+      box.textContent = "\u26A0\uFE0F " + notes.join(" ");
+      box.style.display = "block";
+    } else {
+      box.textContent = "";
+      box.style.display = "none";
+    }
+  }
+
   function updateDashboardUI(data) {
+
+    updateDataNotice(data);
 
     // Location
     const locationName =

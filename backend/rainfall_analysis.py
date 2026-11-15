@@ -56,8 +56,17 @@ class RainfallAnalysisService:
                 "forecast_days": 0,
                 "timezone": "auto"
             }
-            resp = requests.get(url, params=params, timeout=6)
-            if resp.status_code == 200:
+            resp = None
+            for attempt in range(3):
+                try:
+                    resp = requests.get(url, params=params, timeout=15)
+                    if resp.status_code == 200:
+                        break
+                    print(f"[Warning] Open-Meteo rainfall HTTP {resp.status_code} (attempt {attempt + 1})")
+                except requests.RequestException as e:
+                    print(f"[Warning] Open-Meteo rainfall attempt {attempt + 1} failed: {e}")
+                time.sleep(1.5 * (attempt + 1))
+            if resp is not None and resp.status_code == 200:
                 raw = resp.json()
                 daily = raw.get("daily", {})
                 dates = daily.get("time", [])
